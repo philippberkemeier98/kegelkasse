@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A12">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kegelkasse">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<script>window.KEGELKASSE_PWA = true;</script>
+<title>Kegelkasse</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Look: „Kegelbahn bei Nacht“ – dunkler Grund, warmes Bahnlicht (Amber) und kühles Neon hinter Glas.
+   Layout: iOS-artige Einspaltenansicht, große Titel, gruppierte Glas-Listen, schwebende Bedienelemente. */
+:root{
+  --bg:#0A0A12; --ink:#0A0A12;
+  --surface:rgba(255,255,255,.065); --line:rgba(255,255,255,.1);
+  --text:#F6F5FA; --text2:#A6A6B8; --sep:rgba(255,255,255,.08);
+  --fill:rgba(255,255,255,.08); --fill2:rgba(255,255,255,.16);
+  --accent:#FFB020; --accent-hi:#FFD27A; --accent-lo:#FF7A1A; --on-accent:#1A1004;
+  --warm:#FFC861; --warm-bg:rgba(255,176,32,.16); --gold:#FFB020;
+  --danger:#FF7070; --danger-bg:rgba(255,69,58,.18); --ok:#4ADE80; --ok-bg:rgba(74,222,128,.14);
+  --info:#86BDFF; --info-bg:rgba(61,139,255,.2);
+  --glass:rgba(28,28,42,.55); --glass-border:rgba(255,255,255,.14); --glass-hi:rgba(255,255,255,.14);
+  --shadow:rgba(0,0,0,.55); --sheet:rgba(20,20,30,.84); --scrim:rgba(4,4,10,.6);
+  --seg-bg:rgba(255,255,255,.08); --seg-on:rgba(255,255,255,.2);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;
+  --font-display:"Bricolage Grotesque",-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.3;
+  -webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:rgba(10,10,18,.9)}
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ambient::before,.ambient::after,.ambient span{content:"";position:absolute;border-radius:50%;filter:blur(60px)}
+.ambient::before{width:70vmax;height:55vmax;left:-25vmax;top:-22vmax;background:radial-gradient(circle,rgba(255,150,30,.42),rgba(255,150,30,0) 65%)}
+.ambient::after{width:60vmax;height:60vmax;right:-28vmax;top:18vh;background:radial-gradient(circle,rgba(130,80,255,.32),rgba(130,80,255,0) 65%)}
+.ambient span{width:70vmax;height:50vmax;left:-10vmax;bottom:-30vmax;background:radial-gradient(circle,rgba(20,120,255,.28),rgba(20,120,255,0) 65%)}
+#app{position:relative;z-index:1}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.35;cursor:default}
+:focus-visible{outline:3px solid rgba(255,176,32,.7);outline-offset:2px}
+svg{flex:none}
+.main{max-width:600px;margin:0 auto;padding-block:62px 140px}
+
+/* Glas */
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  border:1px solid var(--glass-border);box-shadow:0 12px 34px var(--shadow),inset 0 1px 0 var(--glass-hi)}
+.grp,.card,.kpi,.notice,.hero,.panel{background:var(--surface);border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%)}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:20;max-width:632px;margin:0 auto;pointer-events:none;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));
+  display:flex;justify-content:space-between;align-items:center;gap:8px}
+.topbar>*{pointer-events:auto}
+.topgroup{display:flex;gap:8px}
+.gbtn{width:44px;height:44px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0;color:var(--text)}
+.gcap{height:44px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:600;color:var(--text)}
+.gcap.danger{color:var(--danger)}
+.tonal{background:var(--fill);border:0}
+
+/* Typo */
+.title{font-family:var(--font-display);font-size:38px;font-weight:800;letter-spacing:-1.2px;line-height:1.05;margin:0 4px;text-wrap:balance;
+  background:linear-gradient(100deg,#FFF1D0 0%,#FFC94D 45%,#FF8A1A 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{margin:4px 4px 0;color:var(--text2);font-size:15px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:28px 6px 10px;font-family:var(--font-display);font-size:21px;font-weight:800;letter-spacing:-.4px}
+.hd small{font-family:var(--font);font-size:14px;font-weight:500;color:var(--text2);letter-spacing:0}
+.note{color:var(--text2);font-size:13px;margin:10px 8px 0;line-height:1.45}
+
+/* Gruppen & Zeilen */
+.grp{border-radius:26px;overflow:hidden}
+.card{border-radius:28px;padding:18px;margin-top:18px;display:block;width:100%;text-align:left;color:var(--text)}
+.row{display:flex;align-items:center;gap:12px;padding:10px 16px;min-height:56px;position:relative;width:100%;border:0;background:none;text-align:left;color:var(--text)}
+.row+.row::before{content:"";position:absolute;top:0;left:16px;right:0;height:1px;background:var(--sep)}
+.row.inset+.row.inset::before,.row.inset+.row::before{left:62px}
+.grow{flex:1;min-width:0}
+.nm{font-size:16.5px;font-weight:650;display:flex;align-items:center;gap:6px;min-width:0}
+.nm span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt{font-size:13.5px;color:var(--text2);margin-top:2px}
+.amt{color:var(--text2);font-variant-numeric:tabular-nums}
+.chev{color:var(--text2);opacity:.6}
+.h{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.3px}
+.sub{color:var(--text2);font-size:14px;margin-top:2px}
+
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 7px;white-space:nowrap;flex:none}
+.b-info{color:var(--info);background:var(--info-bg)}
+.b-warm{color:var(--warm);background:var(--warm-bg)}
+.b-danger{color:var(--danger);background:var(--danger-bg)}
+.b-ok{color:var(--ok);background:var(--ok-bg)}
+.b-neutral{color:var(--text);background:var(--fill)}
+
+.avatar{width:36px;height:36px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.06));border:1px solid var(--line);color:var(--text);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.avatar.guest{background:var(--info-bg);color:var(--info)}
+.avatar.warn{background:var(--warm-bg);color:var(--warm)}
+.avatar.big{width:92px;height:92px;font-size:34px;font-family:var(--font-display);font-weight:800;background:linear-gradient(145deg,#FFD27A,#FF7A1A);color:var(--on-accent);border:0;box-shadow:0 10px 40px rgba(255,140,30,.45)}
+
+/* Buttons */
+.btn{height:50px;padding:0 18px;border-radius:999px;border:0;font-size:17px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.prim{background:linear-gradient(135deg,var(--accent-hi),var(--accent) 45%,var(--accent-lo));color:var(--on-accent);box-shadow:0 10px 28px rgba(255,140,30,.38),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn.tonal{background:var(--fill);color:var(--text)}
+.btn.dark{background:var(--text);color:var(--ink);height:44px;font-size:14px;padding:0 16px}
+.btn.danger{background:var(--danger-bg);color:var(--danger)}
+.btn.wide{width:100%}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btnrow .btn{flex:1 1 140px}
+.stack{display:grid;gap:8px}
+
+/* Segment */
+.seg{display:flex;background:var(--seg-bg);border-radius:999px;padding:2px;flex:none;border:1px solid var(--line)}
+.seg button{height:38px;min-width:44px;padding:0 10px;border:0;border-radius:999px;background:none;color:var(--text2);font-size:13px;font-weight:650}
+.seg button.on{background:var(--seg-on);color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18)}
+.seg button.on.s-present{background:rgba(74,222,128,.22);color:var(--ok)}
+.seg button.on.s-unexcused{background:rgba(255,69,58,.24);color:var(--danger)}
+.seg.small button{height:32px;padding:0 14px}
+.seg.full{display:flex;width:100%} .seg.full button{flex:1}
+
+/* Startseite */
+.datebadge{width:52px;height:56px;border-radius:15px;background:var(--fill);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}
+.datebadge b{font-size:11px;color:var(--accent);letter-spacing:.06em}
+.datebadge span{font-family:var(--font-display);font-size:22px;font-weight:800;line-height:1}
+.livecard{display:flex;align-items:center;gap:14px;border-color:rgba(74,222,128,.35)!important}
+.pulse{width:38px;height:38px;border-radius:999px;background:var(--ok-bg);display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.pulse::after{content:"";width:12px;height:12px;border-radius:999px;background:var(--ok);box-shadow:0 0 14px var(--ok);animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(.7);opacity:.6}}
+
+/* Hinweis */
+.notice{display:flex;gap:12px;align-items:center;border-radius:22px;padding:14px 16px;margin-top:12px;border-color:rgba(255,176,32,.35)}
+.notice .ic{width:38px;height:38px;border-radius:999px;background:var(--warm-bg);color:var(--warm);display:flex;align-items:center;justify-content:center;flex:none}
+.notice b{display:block;font-size:15px}
+.notice span{color:var(--text2);font-size:13.5px}
+
+/* Live */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+.kpi{border-radius:22px;padding:12px 14px;min-width:0}
+.kpi .l{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.kpi .v{font-family:var(--font-display);font-size:24px;font-weight:800;letter-spacing:-.6px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.kpi.hot .v{color:var(--accent)}
+.livepill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:650;color:var(--ok);background:var(--ok-bg);border-radius:999px;padding:5px 11px;vertical-align:middle}
+.livepill::before{content:"";width:7px;height:7px;border-radius:999px;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:beat 1.6s ease-in-out infinite}
+.titlerow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 4px}
+.titlerow .title{margin:0}
+.row.live{gap:6px;padding:9px 10px;min-height:68px}
+.row.live.lead{background:linear-gradient(90deg,rgba(255,176,32,.22),rgba(255,176,32,0) 75%)}
+.row.live .mt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt .pp{color:var(--warm);font-weight:800}
+.topbar::before{content:"";position:absolute;left:0;right:0;top:0;bottom:-28px;z-index:-1;pointer-events:none;background:linear-gradient(rgba(10,10,18,.94) 55%,rgba(10,10,18,0))}
+.namebtn{flex:1;min-width:0;border:0;background:none;padding:0;text-align:left;color:var(--text);align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.mt.warm{color:var(--warm);font-weight:650}
+.rk{width:24px;height:24px;border-radius:999px;background:var(--fill);color:var(--text2);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;font-variant-numeric:tabular-nums}
+.rk.lead{background:linear-gradient(145deg,#FFD27A,#FF8A1A);color:var(--on-accent);box-shadow:0 0 14px rgba(255,160,40,.6)}
+.qb{width:44px;height:44px;border-radius:999px;border:0;color:var(--ci,#FFFFFF);font-size:17px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex:none;padding:0;
+  background:radial-gradient(circle at 32% 26%,color-mix(in srgb,var(--c) 55%,#FFFFFF),var(--c) 62%);
+  box-shadow:0 5px 16px color-mix(in srgb,var(--c) 50%,transparent),inset 0 1px 0 rgba(255,255,255,.45);transition:transform .12s}
+.qb:active{transform:scale(.86)}
+.qb.more{background:var(--fill);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.check{width:26px;height:26px;border-radius:999px;border:2px solid var(--fill2);flex:none;display:flex;align-items:center;justify-content:center;color:var(--on-accent)}
+.row.on .check{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(255,176,32,.6)}
+.row.sel.on{background:rgba(255,176,32,.12)}
+.legend{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12.5px;color:var(--text2)}
+.legend b{color:var(--c)}
+.flash{animation:flash .7s ease-out}
+@keyframes flash{from{background:rgba(255,176,32,.28)}to{background:transparent}}
+
+/* Untere Leisten */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:30;
+  width:min(360px,calc(100% - 40px));border-radius:999px;padding:5px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px}
+.tab{height:54px;border-radius:999px;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:650;color:var(--text2)}
+.tab.on{background:rgba(255,176,32,.16);color:var(--accent)}
+.bottombar{position:fixed;left:50%;transform:translateX(-50%);z-index:30;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:min(568px,calc(100% - 32px))}
+.bottombar>.glass{border-radius:999px;padding:6px}
+.selbar{border-radius:32px!important;padding:14px!important}
+.selbar .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.selbar .grid .btn{height:48px;font-size:15px;padding:0 8px;color:var(--ci,#FFFFFF);background:radial-gradient(circle at 30% 20%,color-mix(in srgb,var(--c) 60%,#FFFFFF),var(--c) 70%)}
+.selbar .grid .btn.tonal{background:var(--fill2);color:var(--text)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:40;width:min(568px,calc(100% - 32px));
+  display:flex;align-items:center;gap:10px;border-radius:999px;padding:6px 6px 6px 14px;animation:rise .25s ease-out}
+.toast span{font-size:14.5px;font-weight:550}
+@keyframes rise{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* Sheets */
+.sheet-bg{position:fixed;inset:0;z-index:60;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;
+  padding:0 max(8px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 8px) max(8px,env(safe-area-inset-left,0px));animation:fade .2s}
+.sheet{width:min(560px,100%);max-height:calc(100dvh - env(safe-area-inset-top,0px) - 40px);overflow:auto;border-radius:36px;
+  background:var(--sheet);-webkit-backdrop-filter:blur(34px) saturate(180%);backdrop-filter:blur(34px) saturate(180%);
+  border:1px solid var(--glass-border);box-shadow:0 -6px 50px rgba(0,0,0,.6),inset 0 1px 0 var(--glass-hi);padding:10px 14px 16px;animation:up .28s cubic-bezier(.2,.9,.3,1)}
+@keyframes fade{from{opacity:0}} @keyframes up{from{transform:translateY(40px);opacity:.4}}
+.grab{width:36px;height:5px;border-radius:3px;background:var(--fill2);margin:0 auto 8px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.sheet-title{text-align:center;flex:1;min-width:0}
+.sheet-title b{display:block;font-family:var(--font-display);font-size:19px;font-weight:800;letter-spacing:-.3px}
+.sheet-title span{font-size:13px;color:var(--text2)}
+.spacer44{width:44px;flex:none}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:104px;padding:14px;border:1px solid var(--line);border-radius:22px;background:var(--surface);text-align:left;color:var(--text)}
+.tile.ring{border:1.5px solid var(--c);box-shadow:0 0 22px color-mix(in srgb,var(--c) 30%,transparent)}
+.tile .ti{width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--ci,#FFFFFF);font-weight:800;font-size:15px;
+  background:radial-gradient(circle at 32% 26%,color-mix(in srgb,var(--c) 55%,#FFFFFF),var(--c) 62%);box-shadow:0 4px 12px color-mix(in srgb,var(--c) 45%,transparent)}
+.tile .tn{font-size:15.5px;font-weight:650;line-height:1.25}
+.tile .ta{font-size:13px;color:var(--text2)}
+.panel{border-radius:22px;padding:14px;margin-top:10px}
+.panel h3{margin:0 4px 10px;font-size:15.5px}
+.field{display:block;margin-bottom:10px}
+.field>span{display:block;font-size:13px;color:var(--text2);margin:0 0 6px 4px}
+.input{width:100%;height:48px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.25);padding:0 14px;font-size:16.5px;color:var(--text)}
+.input:focus{border-color:rgba(255,176,32,.6);outline:none}
+textarea.input{height:180px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+select.input{appearance:none;-webkit-appearance:none}
+.inline{display:flex;gap:10px;align-items:flex-end}
+.inline .field{flex:1}
+.checkline{display:flex;align-items:center;gap:10px;min-height:48px;font-size:15px}
+.checkline input{width:22px;height:22px;accent-color:var(--accent)}
+.sheet p{margin:0 4px 14px;color:var(--text2);line-height:1.45;font-size:15px}
+.shareimg{width:100%;border-radius:20px;display:block}
+.presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.presets .btn{height:60px;font-family:var(--font-display);font-size:17px;font-weight:800;padding:0 4px;background:var(--surface);border:1px solid var(--line)}
+.presets .btn:first-child{border-color:rgba(255,176,32,.5);color:var(--accent)}
+
+/* Detail */
+.profile{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:4px}
+.profile h1{margin:8px 0 0;font-family:var(--font-display);font-size:30px;font-weight:800;letter-spacing:-.8px}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px}
+.void .vn,.void .va{text-decoration:line-through;color:var(--text2)}
+.smallbtn{height:32px;padding:0 12px;border-radius:999px;border:0;background:var(--fill);font-size:13px;font-weight:650;color:var(--text);flex:none}
+.smallbtn.red{color:var(--danger);background:var(--danger-bg)}
+.time{font-size:13.5px;color:var(--text2);font-variant-numeric:tabular-nums;width:42px;flex:none}
+.eamt{font-weight:650;font-variant-numeric:tabular-nums;min-width:62px;text-align:right}
+
+/* Ergebnis */
+.rcard{border-radius:32px;overflow:hidden;background:#14141D;color:#F6F5FA;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,176,32,.08);margin-top:6px}
+.rhead{padding:18px;position:relative;overflow:hidden;background:radial-gradient(120% 100% at 100% 0%,rgba(255,150,30,.55),rgba(255,150,30,0) 55%),linear-gradient(165deg,#2B1A07 0%,#14141D 75%)}
+.rhead>*{position:relative}
+.rmeta{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.rking{display:flex;align-items:center;gap:14px;margin-top:16px}
+.rcrown{width:66px;height:66px;border-radius:999px;background:linear-gradient(145deg,#FFE08A,#FFB020 50%,#FF7A1A);color:#1A1004;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 0 0 4px rgba(255,176,32,.2),0 0 40px rgba(255,150,30,.6)}
+.rlabel{font-size:12.5px;font-weight:700;color:#FFC861;text-transform:uppercase;letter-spacing:.08em}
+.rname{font-family:var(--font-display);font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.05}
+.rsub{font-size:13.5px;color:rgba(255,255,255,.72);margin-top:3px}
+.rchips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+.rchip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:9px 6px;text-align:center}
+.rchip .l{font-size:11px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.rchip .v{font-family:var(--font-display);font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:1px}
+.rtable{padding:8px 0 4px}
+.rrow{display:flex;align-items:center;gap:8px;padding:0 18px;min-height:34px;font-size:15px;font-variant-numeric:tabular-nums}
+.rrow:nth-child(even):not(.head){background:rgba(255,255,255,.025)}
+.rrow .r{width:18px;color:#8C8CA0;font-size:13px;font-weight:700;flex:none}
+.rrow .n{flex:1;min-width:0;display:flex;gap:6px;align-items:center}
+.rrow .n span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .n2{flex:1;min-width:0;display:flex;flex-direction:column;padding:5px 0}
+.rrow .n2 b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .n2 small{font-size:11.5px;color:#A6A6B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rrow .n2 small.hot{color:#FF8A80;font-weight:700}
+.rrow .p{width:58px;text-align:right;color:#A6A6B8;flex:none}
+.rrow .b{width:76px;text-align:right;font-weight:700;flex:none}
+.rrow.head{min-height:26px;font-size:11px;color:#8C8CA0;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.rrow.head .c,.rrow.head .b{color:#8C8CA0;font-weight:700}
+.rrow.king{background:linear-gradient(90deg,rgba(255,176,32,.25),rgba(255,176,32,.04))!important}
+.rrow.king .r,.rrow.king .p{color:#FFC861}
+.rrow.king .n{font-weight:800}
+.rrow.fee{gap:6px;padding:0 14px;font-size:14px}
+.rrow.fee .p{width:22px}
+.rrow .c{width:50px;text-align:right;color:#CFCFDA;flex:none}
+.rrow.fee .b{width:58px}
+.rsec{padding:12px 18px 4px;font-size:11px;font-weight:700;color:#8C8CA0;text-transform:uppercase;letter-spacing:.05em}
+.rfoot{padding:10px 18px 16px;font-size:12px;color:#8C8CA0;line-height:1.4}
+.rcard .badge.lg{color:#86BDFF;background:rgba(61,139,255,.2)}
+
+/* Könige & Katalog */
+.hero{display:flex;align-items:center;gap:14px;border-radius:28px;padding:16px;margin-top:14px;border-color:rgba(255,176,32,.35)}
+.crownbig{width:58px;height:58px;border-radius:999px;background:linear-gradient(145deg,#FFE08A,#FFB020 50%,#FF7A1A);color:#1A1004;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 0 30px rgba(255,150,30,.5)}
+.bar{display:flex;align-items:center;gap:10px;padding:8px 16px}
+.bar .bn{width:84px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .bt{flex:1;height:12px;border-radius:999px;background:var(--fill)}
+.bar .bf{height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,.18),rgba(255,255,255,.35))}
+.bar.top .bf{background:linear-gradient(90deg,#FF7A1A,#FFB020,#FFE08A);box-shadow:0 0 14px rgba(255,160,40,.55)}
+.bar.top .bn{font-weight:700}
+.bar .bv{width:24px;text-align:right;font-family:var(--font-display);font-weight:800;font-variant-numeric:tabular-nums}
+.ticon{width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--ci,#FFFFFF);font-size:14px;font-weight:800;flex:none;
+  background:radial-gradient(circle at 32% 26%,color-mix(in srgb,var(--c) 55%,#FFFFFF),var(--c) 62%)}
+.inactive{opacity:.45}
+.empty-state{text-align:center;padding:28px 18px;color:var(--text2)}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="ambient" aria-hidden="true"><span></span></div>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Konstanten & Speicher ---------- */
+const KEY = 'kegelkasse.v1';
+const COLORS = {blue:'#2F7BFF', indigo:'#6D5BFF', raspberry:'#FF3B7A', green:'#2FD27A', teal:'#1EC8E0', orange:'#FFA41B', red:'#FF4D4D', gray:'#8E8EA0'};
+const INK = {green:'#0A0A12', teal:'#0A0A12', orange:'#1A1004', gray:'#0A0A12'};
+const cv = c => `--c:${COLORS[c] || COLORS.gray};--ci:${INK[c] || '#FFFFFF'}`;
+const COLOR_LABELS = {blue:'Blau', indigo:'Indigo', raspberry:'Himbeere', green:'Grün', teal:'Petrol', orange:'Orange', red:'Rot', gray:'Grau'};
+const uid = () => { try { return crypto.randomUUID(); } catch (e) { return Date.now().toString(36) + Math.random().toString(36).slice(2); } };
+
+function T(name, amountCents, short, color, category, recipient, countsAsPump, systemKind, sortOrder) {
+  return {id: uid(), name, amountCents, short, color, category, recipient, countsAsPump, systemKind, sortOrder, isActive: true};
+}
+function defaultTypes() {
+  // Beispielbeträge – im Katalog anpassen.
+  return [
+    T('Pumpe', 50, 'P', 'orange', 'quick', 'player', true, null, 0),
+    Object.assign(T('Spiel verloren', 100, 'S', 'indigo', 'quick', 'player', false, null, 1), {askAmount: true}),
+    T('Klingeln', 20, 'K', 'raspberry', 'quick', 'player', false, null, 2),
+    T('Kugel eingeholt', 50, '', 'green', 'more', 'player', false, null, 10),
+    Object.assign(T('Verspätung', 100, '', 'blue', 'more', 'player', false, null, 11), {askAmount: true}),
+    T('Alle Neune', 50, '9', 'teal', 'more', 'others', false, null, 12),
+    T('Durchschnittsstrafe', 0, 'Ø', 'gray', 'auto', 'player', false, 'average', 20),
+    T('Unentschuldigt nicht da', 500, '!', 'red', 'auto', 'player', false, 'unexcused', 21)
+  ];
+}
+const emptyDb = () => ({version: 3, players: [], types: defaultTypes(), events: [], settings: {feeCents: 0, feeMode: 'month'}});
+// Ältere Datenstände auf den aktuellen Stand bringen.
+function migrate(d) {
+  if (!d.settings) d.settings = {feeCents: 0, feeMode: 'month'};
+  if ((d.version || 1) < 3) {
+    d.types.forEach(t => { if (t.askAmount === undefined || t.name === 'Verspätung') t.askAmount = t.name === 'Spiel verloren' || t.name === 'Verspätung'; });
+    d.version = 3;
+  }
+  return d;
+}
+const isDb = d => d && Array.isArray(d.players) && Array.isArray(d.types) && Array.isArray(d.events);
+
+let storageOk = true;
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) { const d = JSON.parse(raw); if (isDb(d)) return d; }
+  } catch (e) { storageOk = false; }
+  return emptyDb();
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); storageOk = true; } catch (e) { storageOk = false; }
+}
+let db = migrate(load());
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+
+/* ---------- Hilfsfunktionen ---------- */
+const eur = new Intl.NumberFormat('de-DE', {style: 'currency', currency: 'EUR'});
+const fmt = c => eur.format(c / 100);
+function parseMoney(s) {
+  const t = String(s || '').replace(/€|\s/g, '').replace(',', '.');
+  if (t === '') return null;
+  const v = Number(t);
+  if (!isFinite(v) || v < 0) return null;
+  return Math.round(v * 100);
+}
+const editMoney = c => (c / 100).toFixed(2).replace('.', ',');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
+const isoOf = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const todayISO = () => isoOf(new Date());
+const dateObj = iso => new Date(iso + 'T12:00:00');
+const fmtDate = (iso, opts) => dateObj(iso).toLocaleDateString('de-DE', opts);
+const byName = (a, b) => a.name.localeCompare(b.name, 'de');
+const initials = name => (name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('') || '?').toUpperCase();
+
+const player = id => db.players.find(p => p.id === id);
+const typeById = id => db.types.find(t => t.id === id);
+const evById = id => db.events.find(e => e.id === id);
+const activeMembers = () => db.players.filter(p => !p.isGuest && !p.isArchived).sort(byName);
+const sortedTypes = () => [...db.types].sort((a, b) => a.sortOrder - b.sortOrder);
+const quickTypes = () => sortedTypes().filter(t => t.category === 'quick' && t.isActive).slice(0, 3);
+const typeLabel = t => t.short || t.name.charAt(0).toUpperCase();
+
+const present = e => e.attendances.filter(a => a.status === 'present').map(a => player(a.playerId)).filter(Boolean).sort(byName);
+const absent = e => e.attendances.filter(a => a.status !== 'present' && player(a.playerId))
+  .sort((a, b) => byName(player(a.playerId), player(b.playerId)));
+const validEntries = e => e.entries.filter(x => !x.isVoided);
+const totalOf = (e, pid) => validEntries(e).filter(x => x.playerId === pid).reduce((s, x) => s + x.amountCents, 0);
+const pumpsOf = (e, pid) => validEntries(e).filter(x => x.playerId === pid && x.isPump).length;
+const totalEv = e => validEntries(e).reduce((s, x) => s + x.amountCents, 0);
+const pumpsEv = e => validEntries(e).filter(x => x.isPump).length;
+const closedEvents = () => db.events.filter(e => e.status === 'closed').sort((a, b) => b.date.localeCompare(a.date) || (b.closedAt || 0) - (a.closedAt || 0));
+
+/* ---------- Fachregeln ---------- */
+const Rules = {
+  step: 50,
+  // Durchschnitt aller Anwesenden inkl. Gäste, aufgerundet auf 0,50 €.
+  average(totals) {
+    if (!totals.length) return null;
+    const t = totals.reduce((s, x) => s + x, 0);
+    if (t <= 0) return 0;
+    const d = totals.length * this.step;
+    return Math.floor((t + d - 1) / d) * this.step;
+  },
+  exact(totals) { return totals.length ? totals.reduce((s, x) => s + x, 0) / totals.length : null; },
+  // Abwesenheiten in Folge (neueste zuerst); entschuldigt zählt mit.
+  streak(prev) { let n = 0; for (const p of prev) { if (p) break; n++; } return n; },
+  // Nur Stammspieler, mindestens eine Pumpe. Mehrere = Stechen.
+  kings(counts) {
+    const el = counts.filter(c => !c.isGuest && c.pumps > 0);
+    if (!el.length) return [];
+    const m = Math.max(...el.map(c => c.pumps));
+    return el.filter(c => c.pumps === m).map(c => c.id);
+  }
+};
+function previousPresence(pid, beforeISO) {
+  return db.events.filter(e => e.status === 'closed' && e.date < beforeISO)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map(e => e.attendances.find(a => a.playerId === pid)).filter(Boolean)
+    .map(a => a.status === 'present');
+}
+function titleCounts(refISO, months) {
+  refISO = refISO || todayISO();
+  const r = {};
+  let startISO = '';
+  if (months) { const d = dateObj(refISO); d.setMonth(d.getMonth() - months); startISO = isoOf(d); }
+  for (const e of db.events) {
+    if (e.status === 'closed' && e.kingId && e.date > startISO && e.date <= refISO) r[e.kingId] = (r[e.kingId] || 0) + 1;
+  }
+  return r;
+}
+function kingCandidates(e) {
+  const ps = present(e);
+  const ids = Rules.kings(ps.map(p => ({id: p.id, pumps: pumpsOf(e, p.id), isGuest: p.isGuest})));
+  return ps.filter(p => ids.includes(p.id));
+}
+function ranks(e) {
+  const r = {};
+  [...present(e)].sort((a, b) => totalOf(e, b.id) - totalOf(e, a.id)).forEach((p, i) => { r[p.id] = i + 1; });
+  return r;
+}
+
+/* ---------- Schreibende Vorgänge ---------- */
+const mkEntry = (pid, name, cents, isPump, source, groupId, typeId) =>
+  ({id: uid(), playerId: pid, name, amountCents: cents, isPump: !!isPump, source, groupId, typeId: typeId || null, ts: Date.now(), isVoided: false});
+
+function book(e, type, targets, overrideCents) {
+  if (overrideCents != null) type = Object.assign({}, type, {amountCents: overrideCents});
+  const g = uid();
+  let rec, src;
+  if (type.recipient === 'others') {
+    const ex = new Set(targets.map(p => p.id));
+    rec = present(e).filter(p => !ex.has(p.id)); src = 'allOthers';
+  } else { rec = targets; src = 'manual'; }
+  if (!rec.length) return;
+  rec.forEach(p => e.entries.push(mkEntry(p.id, type.name, type.amountCents, type.countsAsPump, src, g, type.id)));
+  save();
+  let msg;
+  if (src === 'allOthers') msg = `${type.name} von ${targets[0].name} · ${rec.length} zahlen je ${fmt(type.amountCents)}`;
+  else if (rec.length === 1) msg = `${type.name} · ${rec[0].name} · ${fmt(type.amountCents)}`;
+  else msg = `${type.name} · ${rec.length} Kegler · je ${fmt(type.amountCents)}`;
+  showToast(e.id, g, msg, rec.map(p => p.id));
+}
+function bookOther(e, name, cents, targets) {
+  const g = uid();
+  targets.forEach(p => e.entries.push(mkEntry(p.id, name, cents, false, 'other', g, null)));
+  save();
+  showToast(e.id, g, `${name} · ${targets.length === 1 ? targets[0].name : targets.length + ' Kegler'} · ${fmt(cents)}`, targets.map(p => p.id));
+}
+const isAuto = x => x.source === 'average' || x.source === 'unexcused';
+function closeEvent(e, kingId) {
+  e.entries = e.entries.filter(x => !isAuto(x));
+  const avg = Rules.average(present(e).map(p => totalOf(e, p.id))) || 0;
+  const unex = db.types.find(t => t.systemKind === 'unexcused');
+  const avgType = db.types.find(t => t.systemKind === 'average');
+  const g = uid();
+  for (const a of absent(e)) {
+    if (avg > 0) e.entries.push(mkEntry(a.playerId, avgType ? avgType.name : 'Durchschnittsstrafe', avg, false, 'average', g, avgType && avgType.id));
+    if (a.status === 'unexcused' && unex && unex.isActive && unex.amountCents > 0)
+      e.entries.push(mkEntry(a.playerId, unex.name, unex.amountCents, false, 'unexcused', g, unex.id));
+  }
+  e.closedAt = Date.now();
+  e.feeCents = feeFor(e);
+  e.averageCents = avg; e.kingId = kingId || null; e.status = 'closed';
+  save();
+}
+// Monatsbeitrag je Stammspieler (anwesend oder nicht), Gäste zahlen keinen.
+// Modus "month": nur am ersten abgeschlossenen Abend eines Kalendermonats.
+function feeFor(e) {
+  const s = db.settings;
+  if (!s.feeCents) return 0;
+  if (s.feeMode === 'event') return s.feeCents;
+  const m = e.date.slice(0, 7);
+  const earlier = db.events.some(o => o !== e && o.status === 'closed' && o.date.slice(0, 7) === m &&
+    (o.date < e.date || (o.date === e.date && (o.closedAt || 0) < e.closedAt)));
+  return earlier ? 0 : s.feeCents;
+}
+function reopenEvent(e) {
+  e.entries = e.entries.filter(x => !isAuto(x));
+  e.averageCents = null; e.kingId = null; e.closedAt = null; e.feeCents = null; e.status = 'live';
+  save();
+}
+
+/* ---------- Ergebnis-Zusammenfassung ---------- */
+function summary(e) {
+  const ps = present(e);
+  const fee = e.feeCents || 0;
+  const rows = [...ps].sort((a, b) => (totalOf(e, b.id) - totalOf(e, a.id)) || (pumpsOf(e, b.id) - pumpsOf(e, a.id)))
+    .map((p, i) => ({id: p.id, rank: i + 1, name: p.name, tag: p.isGuest ? 'Gast' : '', tagKind: 'g', pumps: pumpsOf(e, p.id), cents: totalOf(e, p.id), fee: p.isGuest ? 0 : fee}));
+  const abs = absent(e).map(a => {
+    const p = player(a.playerId);
+    return {id: p.id, rank: null, name: p.name, tag: a.status === 'unexcused' ? 'unent.' : 'entsch.',
+      tagKind: a.status === 'unexcused' ? 'r' : 'x', mark: a.status === 'unexcused' ? 'Ø+' : 'Ø', cents: totalOf(e, p.id), fee,
+      streak: Rules.streak(previousPresence(p.id, e.date)) + 1};
+  });
+  [...rows, ...abs].forEach(r => { r.sum = r.cents + r.fee; });
+  abs.forEach(r => { r.subline = (r.tagKind === 'r' ? 'unentsch.' : 'entsch.') + ' · ' + (r.streak === 1 ? 'erstmals gefehlt' : `${r.streak}× in Folge`); });
+  const feeTotal = [...rows, ...abs].reduce((s, r) => s + r.fee, 0);
+  const totals = ps.map(p => totalOf(e, p.id));
+  const exact = Rules.exact(totals);
+  const king = e.kingId ? player(e.kingId) : null;
+  const guests = ps.filter(p => p.isGuest).length;
+  return {
+    date: e.date,
+    dateLabel: 'Kegelabend · ' + fmtDate(e.date, {weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric'}),
+    countLabel: `${ps.length} da` + (guests ? ` · ${guests} ${guests === 1 ? 'Gast' : 'Gäste'}` : ''),
+    present: rows, absent: abs, total: totalEv(e), avg: e.averageCents || 0, pumps: pumpsEv(e),
+    hasFee: feeTotal > 0, feeTotal, grand: totalEv(e) + feeTotal,
+    exactLabel: exact != null && abs.length ? `Ø = ${fmt(totals.reduce((s, x) => s + x, 0))} / ${ps.length} Anwesende = ${eur.format(exact / 100)} → auf 0,50 € aufgerundet = ${fmt(e.averageCents || 0)}` : '',
+    kingId: e.kingId, kingName: king ? king.name : '', kingPumps: king ? pumpsOf(e, king.id) : 0,
+    kingTitles: king ? (titleCounts(e.date, 12)[king.id] || 0) : 0
+  };
+}
+
+/* ---------- Icons ---------- */
+const sv = (p, w = 20, extra = '') => `<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${p}</svg>`;
+const I = {
+  plus: sv('<path d="M12 5v14M5 12h14"/>'),
+  x: sv('<path d="M6 6l12 12M18 6L6 18"/>', 18),
+  back: sv('<path d="M15 5l-7 7 7 7"/>'),
+  chev: sv('<path d="M9 5l7 7-7 7"/>', 16, 'class="chev"'),
+  more: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  share: sv('<path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/>'),
+  crown: (w = 20) => `<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="currentColor" aria-hidden="true"><path d="M3 7.5l4.6 4.2L12 4.5l4.4 7.2L21 7.5 19.2 18H4.8z"/><rect x="4.8" y="19.2" width="14.4" height="2" rx="1"/></svg>`,
+  cal: sv('<rect x="4" y="5" width="16" height="15" rx="4"/><path d="M4 10h16M9 3v4M15 3v4"/>', 22),
+  people: sv('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 010 7M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/>', 22),
+  list: sv('<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>', 22),
+  check: sv('<path d="M5 12l5 5 9-10"/>', 14, 'stroke-width="3.4"'),
+  okfill: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#34C759"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  warn: sv('<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5h.01"/>'),
+  data: sv('<path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>')
+};
+
+/* ---------- UI-Zustand ---------- */
+const ui = {tab: 'events', stack: [], sheet: null, toast: null, selecting: false, selection: new Set(), sortRank: false, setup: null, kingPeriod: '12', flash: []};
+let toastTimer = null, lastKey = '';
+const scrollMem = {};
+const app = document.getElementById('app');
+const screen = () => ui.stack.length ? ui.stack[ui.stack.length - 1] : {name: ui.tab};
+const push = s => { ui.stack.push(s); render(); };
+const replaceTop = s => { if (ui.stack.length) ui.stack[ui.stack.length - 1] = s; else ui.stack.push(s); };
+
+function showToast(eventId, groupId, msg, pids) {
+  ui.toast = {eventId, groupId, msg};
+  ui.flash = pids || [];
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { ui.toast = null; render(); }, 5000);
+}
+
+const badge = (text, kind) => `<span class="badge b-${kind}">${esc(text)}</span>`;
+const crownBadge = n => `<span class="badge b-warm">${I.crown(11)}${n}×</span>`;
+const avatar = (p, extra = '') => `<span class="avatar${p.isGuest ? ' guest' : ''}${extra}">${esc(initials(p.name))}</span>`;
+const sheetHead = (title, sub) => `<div class="grab"></div><div class="sheet-head"><button class="gbtn tonal" data-a="sheetClose" aria-label="Schließen">${I.x}</button><div class="sheet-title"><b>${esc(title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div><span class="spacer44"></span></div>`;
+
+/* ---------- Render ---------- */
+function render() {
+  const s = screen();
+  const key = s.name + (s.eventId || '') + (s.pid || '');
+  if (key !== lastKey) scrollMem[lastKey] = window.scrollY;
+  let v;
+  switch (s.name) {
+    case 'events': v = vEvents(); break;
+    case 'players': v = vPlayers(); break;
+    case 'catalog': v = vCatalog(); break;
+    case 'kings': v = vKings(); break;
+    case 'setup': v = vSetup(); break;
+    case 'live': v = vLive(s); break;
+    case 'detail': v = vDetail(s); break;
+    case 'result': v = vResult(s); break;
+    default: v = vEvents();
+  }
+  const root = !ui.stack.length;
+  const showToastNow = ui.toast && s.name === 'live' && !ui.selecting;
+  app.innerHTML =
+    `<div class="topbar">${v.top || '<span></span>'}</div>` +
+    `<main class="main">${v.body}</main>` +
+    (v.bottom ? `<div class="bottombar">${v.bottom}</div>` : '') +
+    (root ? vTabbar() : '') +
+    (showToastNow ? vToast() : '') +
+    (ui.sheet ? `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true">${vSheet()}</div></div>` : '');
+  if (key !== lastKey) { window.scrollTo(0, scrollMem[key] || 0); lastKey = key; }
+  ui.flash = [];
+  if (ui.focus) { const el = document.getElementById(ui.focus); if (el) el.focus(); ui.focus = null; }
+}
+
+function vTabbar() {
+  const tabs = [['events', 'Abende', I.cal], ['players', 'Spieler', I.people], ['catalog', 'Katalog', I.list], ['kings', 'Könige', I.crown(22)]];
+  return `<nav class="tabbar glass" aria-label="Hauptnavigation">${tabs.map(([k, l, ic]) =>
+    `<button class="tab${ui.tab === k ? ' on' : ''}" data-a="tab" data-v="${k}"${ui.tab === k ? ' aria-current="page"' : ''}>${ic}<span>${l}</span></button>`).join('')}</nav>`;
+}
+function vToast() {
+  return `<div class="toast glass" role="status">${I.okfill}<span class="grow">${esc(ui.toast.msg)}</span><button class="btn dark" data-a="undo">Widerrufen</button></div>`;
+}
+
+/* Abende */
+function vEvents() {
+  const live = db.events.find(e => e.status === 'live');
+  const closed = closedEvents();
+  const members = activeMembers();
+  let hero;
+  if (live) {
+    hero = `<button class="card livecard" data-a="open" data-id="${live.id}"><span class="pulse"></span><div class="grow"><div class="h">Laufender Abend</div><div class="sub">${esc(fmtDate(live.date, {weekday: 'long', day: 'numeric', month: 'long'}))} · ${fmt(totalEv(live))}</div></div>${I.chev}</button>`;
+  } else if (!members.length) {
+    hero = `<div class="card"><div class="h">Willkommen in der Kegelkasse</div><p class="sub" style="line-height:1.45">Lege zuerst eure Stammspieler an. Oder lade einen Beispielclub mit drei vergangenen Abenden zum Ausprobieren.</p>
+      <div class="btnrow"><button class="btn prim" data-a="tab" data-v="players">Spieler anlegen</button><button class="btn tonal" data-a="demo">Beispielclub laden</button></div></div>`;
+  } else {
+    const t = todayISO();
+    hero = `<div class="card"><div style="display:flex;gap:12px;align-items:center"><div class="datebadge"><b>${esc(fmtDate(t, {weekday: 'short'}).replace('.', '').toUpperCase())}</b><span>${dateObj(t).getDate()}</span></div>
+      <div><div class="sub" style="margin:0">Heute Abend</div><div class="h">Kegelabend ${esc(fmtDate(t, {day: '2-digit', month: '2-digit'}))}</div></div></div>
+      <button class="btn prim wide" style="margin-top:16px" data-a="newEvent">Kegelabend starten</button></div>`;
+  }
+  const rows = closed.map(e => {
+    const k = e.kingId && player(e.kingId);
+    return `<button class="row inset" data-a="open" data-id="${e.id}"><div class="datebadge" style="width:44px;height:48px;border-radius:12px"><b>${esc(fmtDate(e.date, {weekday: 'short'}).replace('.', '').toUpperCase())}</b><span style="font-size:19px">${dateObj(e.date).getDate()}</span></div>
+      <div class="grow"><div style="font-weight:600">${esc(fmtDate(e.date, {day: 'numeric', month: 'long', year: 'numeric'}))}</div><div class="mt">${k ? 'Hut: ' + esc(k.name) + ' · ' : ''}${present(e).length} da</div></div>
+      <span class="amt">${fmt(totalEv(e))}</span>${I.chev}</button>`;
+  }).join('');
+  return {
+    top: `<span></span><button class="gbtn glass" data-a="dataMenu" aria-label="Daten und Export">${I.data}</button>`,
+    body: `<h1 class="title">Kegelkasse</h1><p class="subtitle">${closed.length} ${closed.length === 1 ? 'Abend' : 'Abende'} erfasst</p>${hero}
+      <h2 class="hd">Vergangene Abende</h2>${closed.length ? `<div class="grp">${rows}</div>` : '<p class="note">Noch keine abgeschlossenen Abende.</p>'}
+      ${storageOk ? '' : '<p class="note" style="color:var(--danger)">Speichern ist in diesem Browser blockiert. Daten gehen beim Schließen verloren.</p>'}`
+  };
+}
+
+/* Abend vorbereiten */
+function vSetup() {
+  const st = ui.setup;
+  const members = activeMembers();
+  const sOf = p => st.statuses[p.id] || 'present';
+  const warnOf = p => sOf(p) !== 'present' && Rules.streak(previousPresence(p.id, st.date)) >= 2;
+  const count = members.filter(p => sOf(p) === 'present').length + st.guests.length;
+  const warnings = members.filter(warnOf).map(p =>
+    `<div class="notice" role="status"><span class="ic">${I.warn}</span><div><b>${esc(p.name)} fehlt den 3. Abend in Folge.</b><span>Entschuldigtes Fehlen zählt mit.</span></div></div>`).join('');
+  const segBtn = (p, val, label) => `<button class="${sOf(p) === val ? 'on ' : ''}s-${val}" data-a="setStatus" data-pid="${p.id}" data-v="${val}" aria-pressed="${sOf(p) === val}">${label}</button>`;
+  const rows = members.map(p => `<div class="row inset">${avatar(p, warnOf(p) ? ' warn' : '')}<div class="grow"><div class="nm"><span class="n">${esc(p.name)}</span></div>${warnOf(p) ? '<div class="mt" style="color:var(--warm);font-weight:600">3× in Folge</div>' : ''}</div>
+    <div class="seg" role="group" aria-label="Status ${esc(p.name)}">${segBtn(p, 'present', 'Da')}${segBtn(p, 'excused', 'Entsch.')}${segBtn(p, 'unexcused', 'Unent.')}</div></div>`).join('');
+  const guests = st.guests.map(id => player(id)).filter(Boolean).map(g =>
+    `<div class="row inset">${avatar(g)}<div class="grow nm"><span class="n">${esc(g.name)}</span></div><button class="smallbtn red" data-a="removeGuest" data-pid="${g.id}">Entfernen</button></div>`).join('');
+  return {
+    top: `<button class="gbtn glass" data-a="back" aria-label="Abbrechen">${I.x}</button><b style="font-size:15px">Neuer Abend</b><span class="spacer44"></span>`,
+    body: `<h1 class="title">Wer ist da?</h1>
+      <div class="grp" style="margin-top:14px"><label class="row" for="setupDate"><span class="grow">Datum</span><input class="input" style="width:auto;height:40px" type="date" id="setupDate" value="${st.date}"></label></div>
+      ${warnings}
+      <h2 class="hd">Stammspieler <small>${members.filter(p => sOf(p) === 'present').length} von ${members.length}</small></h2>
+      ${members.length ? `<div class="grp">${rows}</div>` : '<p class="note">Lege zuerst Stammspieler im Tab „Spieler“ an.</p>'}
+      <p class="note">Abwesende zahlen beim Schließen die Durchschnittsstrafe, Unentschuldigte zusätzlich die Strafe „Unentschuldigt“.</p>
+      <h2 class="hd">Gäste</h2>
+      <div class="grp">${guests}<button class="row" data-a="guestSheet" style="color:var(--accent);font-weight:500">${I.plus} Gast hinzufügen</button></div>`,
+    bottom: `<div class="glass" style="border-radius:999px;padding:6px"><button class="btn prim wide" data-a="startEvent"${count ? '' : ' disabled'}>Kegeln starten · ${count} Kegler</button></div>`
+  };
+}
+
+/* Live */
+function vLive(s) {
+  const e = evById(s.eventId);
+  if (!e) { ui.stack = []; return vEvents(); }
+  const ps = present(e);
+  const rk = ranks(e);
+  const leaders = new Set(kingCandidates(e).map(p => p.id));
+  const titles = titleCounts(todayISO(), 12);
+  const list = ui.sortRank ? [...ps].sort((a, b) => totalOf(e, b.id) - totalOf(e, a.id)) : ps;
+  const quick = quickTypes();
+  const exact = Rules.exact(ps.map(p => totalOf(e, p.id)));
+  const meta = p => `${fmt(totalOf(e, p.id))} · <b class="pp">${pumpsOf(e, p.id)} P</b>`;
+  const rankDot = p => `<span class="rk${leaders.has(p.id) ? ' lead' : ''}" aria-label="Platz ${rk[p.id]}">${rk[p.id]}</span>`;
+  const nameLine = p => `<span class="nm"><span class="n">${esc(p.name)}</span>${p.isGuest ? badge('Gast', 'info') : ''}</span>`;
+  const rows = list.map(p => {
+    const lead = leaders.has(p.id);
+    const fl = ui.flash.includes(p.id) ? ' flash' : '';
+    if (ui.selecting) {
+      const on = ui.selection.has(p.id);
+      return `<button class="row live sel${on ? ' on' : ''}" data-a="selToggle" data-pid="${p.id}" aria-pressed="${on}"><span class="check">${on ? I.check : ''}</span><span class="grow">${nameLine(p)}<span class="mt" style="display:block">${meta(p)}</span></span></button>`;
+    }
+    return `<div class="row live${lead ? ' lead' : ''}${fl}">${rankDot(p)}<button class="namebtn" data-a="detail" data-pid="${p.id}">${nameLine(p)}<span class="mt${lead ? ' warm' : ''}">${meta(p)}</span></button>` +
+      quick.map(t => `<button class="qb" style="${cv(t.color)}" data-a="quick" data-pid="${p.id}" data-t="${t.id}" aria-label="${esc(t.name)} für ${esc(p.name)}">${esc(typeLabel(t))}</button>`).join('') +
+      `<button class="qb more" data-a="more" data-pid="${p.id}" aria-label="Weitere Strafen für ${esc(p.name)}">${I.more}</button></div>`;
+  }).join('');
+  const abs = absent(e).map(a => `${esc(player(a.playerId).name)} (${a.status === 'unexcused' ? 'unentschuldigt' : 'entschuldigt'})`).join(', ');
+  const top = ui.selecting
+    ? `<button class="gcap glass" data-a="selCancel">Abbrechen</button><button class="gcap glass" data-a="selAll">Alle</button>`
+    : `<button class="gbtn glass" data-a="back" aria-label="Zurück zu den Abenden">${I.back}</button><div class="topgroup"><button class="gcap glass" data-a="selStart">Auswählen</button><button class="gcap glass danger" data-a="closeAsk">Schließen</button></div>`;
+  let bottom = '';
+  if (ui.selecting) {
+    const n = ui.selection.size;
+    bottom = `<div class="glass selbar"><div style="font-size:14px"><b>${n ? `Für ${n} buchen` : 'Kegler auswählen'}</b>${n ? ' · ' + esc(ps.filter(p => ui.selection.has(p.id)).map(p => p.name).join(', ')) : ''}</div>
+      <div class="grid">${quick.map((t, i) => `<button class="btn" style="${cv(t.color)}${i === 1 && quick.length === 3 ? '' : ''}" data-a="selBook" data-t="${t.id}"${n ? '' : ' disabled'}>${esc(t.name)}</button>`).join('')}
+      <button class="btn tonal" style="grid-column:1/-1" data-a="selMore"${n ? '' : ' disabled'}>Weitere Strafe oder Sonstiges</button></div></div>`;
+  }
+  return {
+    top,
+    body: `<div class="titlerow"><h1 class="title">Live</h1><span class="livepill">seit ${new Date(e.startedAt).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</span></div>
+      <div class="kpis"><div class="kpi"><div class="l">Kasse</div><div class="v">${fmt(totalEv(e))}</div></div><div class="kpi hot"><div class="l">Pumpen</div><div class="v">${pumpsEv(e)}</div></div><div class="kpi"><div class="l">Ø pro Kopf</div><div class="v">${exact == null ? '–' : eur.format(exact / 100)}</div></div></div>
+      <div class="hd">${ps.length} Kegler<div class="seg small" role="group" aria-label="Sortierung"><button class="${ui.sortRank ? '' : 'on'}" data-a="sortRank" data-v="0">A–Z</button><button class="${ui.sortRank ? 'on' : ''}" data-a="sortRank" data-v="1">Rang</button></div></div>
+      <div class="grp">${rows || '<div class="empty-state">Niemand anwesend.</div>'}</div>
+      ${!ui.selecting && quick.length ? `<div class="legend">${quick.map(t => `<span style="${cv(t.color)}"><b>${esc(typeLabel(t))}</b> ${esc(t.name)}</span>`).join('')}</div>` : ''}
+      ${abs ? `<p class="note">Abwesend: ${abs}</p>` : ''}`,
+    bottom
+  };
+}
+
+/* Spieler-Detail */
+function vDetail(s) {
+  const e = evById(s.eventId), p = player(s.pid);
+  if (!e || !p) { ui.stack.pop(); return vEvents(); }
+  const entries = e.entries.filter(x => x.playerId === p.id).sort((a, b) => b.ts - a.ts);
+  const valid = entries.filter(x => !x.isVoided);
+  const groups = {};
+  valid.forEach(x => { groups[x.name] = groups[x.name] || {n: 0, c: 0}; groups[x.name].n++; groups[x.name].c += x.amountCents; });
+  const rk = ranks(e)[p.id];
+  const titles = titleCounts(todayISO(), 12)[p.id];
+  const chips = Object.entries(groups).sort((a, b) => b[1].c - a[1].c).map(([n, g]) => `<span class="badge b-neutral" style="font-size:13px;padding:6px 12px;font-weight:500">${g.n}× ${esc(n)} · ${fmt(g.c)}</span>`).join('');
+  const rows = entries.map(x => `<div class="row${x.isVoided ? ' void' : ''}"><span class="time">${new Date(x.ts).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</span>
+    <div class="grow"><div class="vn">${esc(x.name)}</div>${x.source === 'allOthers' ? '<div class="mt">für alle anderen</div>' : ''}${isAuto(x) ? '<div class="mt">automatisch</div>' : ''}</div>
+    <span class="eamt va">${fmt(x.amountCents)}</span>${isAuto(x) ? '' : `<button class="smallbtn${x.isVoided ? '' : ' red'}" data-a="void" data-id="${x.id}">${x.isVoided ? 'Zurück' : 'Storno'}</button>`}</div>`).join('');
+  return {
+    top: `<button class="gbtn glass" data-a="back" aria-label="Zurück">${I.back}</button>`,
+    body: `<div class="profile">${avatar(p, ' big')}<h1>${esc(p.name)}</h1><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${p.isGuest ? badge('Gast', 'info') : ''}${titles ? `<span class="badge b-warm" style="font-size:13px;padding:4px 10px">${I.crown(12)} ${titles}× Pumpenkönig in 12 Monaten</span>` : ''}</div></div>
+      <div class="kpis"><div class="kpi"><div class="l">Heute</div><div class="v">${fmt(totalOf(e, p.id))}</div></div><div class="kpi"><div class="l">Pumpen</div><div class="v" style="color:var(--warm)">${pumpsOf(e, p.id)}</div></div><div class="kpi"><div class="l">Platz</div><div class="v">${rk ? rk + ' / ' + present(e).length : '–'}</div></div></div>
+      ${chips ? `<div class="chips">${chips}</div>` : ''}
+      <h2 class="hd">Buchungen</h2>
+      <div class="grp">${rows || '<div class="empty-state">Noch keine Strafen.</div>'}</div>
+      <p class="note">„Storno“ streicht eine Buchung durch, statt sie zu löschen.</p>`
+  };
+}
+
+/* Ergebnis */
+function resultCardHtml(sm) {
+  const tagCls = {g: 'lg', x: 'lx', r: 'lr'};
+  const F = sm.hasFee;
+  const money = c => F ? fmt(c).replace(/\s?€/, '') : fmt(c);
+  const row = r => `<div class="rrow${F ? ' fee' : ''}${r.id === sm.kingId && r.rank ? ' king' : ''}"><span class="r">${r.rank || ''}</span>${r.rank ? `<span class="n"><span>${esc(r.name)}</span>${r.tag ? `<span class="badge ${tagCls[r.tagKind]}">${esc(r.tag)}</span>` : ''}</span>` : `<span class="n2"><b>${esc(r.name)}</b><small${r.streak >= 3 ? ' class="hot"' : ''}>${esc(r.subline)}</small></span>`}<span class="p">${r.rank ? r.pumps : esc(r.mark)}</span>` +
+    (F ? `<span class="c">${money(r.cents)}</span><span class="c">${money(r.fee)}</span><span class="b">${money(r.sum)}</span>` : `<span class="b">${fmt(r.cents)}</span>`) + `</div>`;
+  const chips = F ? [['Strafen', fmt(sm.total)], ['Beiträge', fmt(sm.feeTotal)], ['Kasse gesamt', fmt(sm.grand)]] : [['Gesamt', fmt(sm.total)], ['Ø-Strafe', fmt(sm.avg)], ['Pumpen', sm.pumps]];
+  return `<div class="rcard"><div class="rhead"><div class="rmeta"><span>${esc(sm.dateLabel)}</span><span>${esc(sm.countLabel)}</span></div>
+    <div class="rking"><div class="rcrown">${I.crown(34)}</div><div class="grow"><div class="rlabel">Pumpenkönig · Hut auf</div><div class="rname">${esc(sm.kingName || 'Kein König')}</div>${sm.kingName ? `<div class="rsub">${sm.kingPumps} Pumpen · ${sm.kingTitles}. Titel in 12 Monaten</div>` : ''}</div></div>
+    <div class="rchips">${chips.map(([l, v]) => `<div class="rchip"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('')}</div></div>
+    <div class="rtable"><div class="rrow head${F ? ' fee' : ''}"><span class="r"></span><span class="n">Kegler</span><span class="p">${F ? 'P' : 'Pumpen'}</span>${F ? '<span class="c">Strafe</span><span class="c">Beitrag</span><span class="b">Gesamt</span>' : '<span class="b">Betrag</span>'}</div>
+    ${sm.present.map(row).join('')}${sm.absent.length ? '<div class="rsec">Abwesend</div>' + sm.absent.map(row).join('') : ''}</div>
+    ${sm.exactLabel || F ? `<div class="rfoot">${F ? 'Beträge in €. ' : ''}${esc(sm.exactLabel)}</div>` : ''}</div>`;
+}
+function vResult(s) {
+  const e = evById(s.eventId);
+  if (!e) { ui.stack = []; return vEvents(); }
+  if (e.status === 'live') { replaceTop({name: 'live', eventId: e.id}); return vLive(screen()); }
+  return {
+    top: `<button class="gbtn glass" data-a="back" aria-label="Zurück">${I.back}</button><button class="gbtn glass" data-a="resultMenu" aria-label="Weitere Aktionen">${I.more}</button>`,
+    body: `<h1 class="title" style="margin-bottom:12px">Ergebnis</h1>${resultCardHtml(summary(e))}`,
+    bottom: `<div class="glass" style="border-radius:999px;padding:6px"><button class="btn prim wide" data-a="share">${I.share} Teilen</button></div>`
+  };
+}
+
+/* Katalog */
+function vCatalog() {
+  const cats = [['quick', 'Schnellstrafen', 'Die ersten drei aktiven erscheinen als runde Tasten im Live-Board.'],
+    ['more', 'Weitere', 'Erscheinen im Menü „…“. „Alle anderen“ bedeutet: alle außer dem Werfer zahlen, inkl. Gäste.'],
+    ['auto', 'Automatisch', 'Werden beim Schließen für Abwesende gebucht.']];
+  const sub = t => [t.countsAsPump && 'zählt als Pumpe', t.askAmount && 'Betrag wird abgefragt', t.recipient === 'others' && 'alle anderen zahlen',
+    t.systemKind === 'average' && 'inkl. Gäste · auf 0,50 € aufgerundet', t.systemKind === 'unexcused' && 'zusätzlich zum Durchschnitt', !t.isActive && 'inaktiv'].filter(Boolean).join(' · ');
+  const body = cats.map(([c, title, foot]) => {
+    const items = sortedTypes().filter(t => t.category === c);
+    return `<h2 class="hd">${title}</h2><div class="grp">${items.map(t => `<button class="row inset${t.isActive ? '' : ' inactive'}" data-a="editType" data-id="${t.id}"><span class="ticon" style="${cv(t.color)}">${esc(typeLabel(t))}</span><div class="grow"><div>${esc(t.name)}</div>${sub(t) ? `<div class="mt">${sub(t)}</div>` : ''}</div>${t.systemKind === 'average' ? '' : `<span class="amt">${fmt(t.amountCents)}</span>`}${I.chev}</button>`).join('') || '<div class="empty-state">Keine Einträge.</div>'}</div><p class="note">${foot}</p>`;
+  }).join('');
+  return {
+    top: `<span></span><button class="gbtn glass" data-a="newType" aria-label="Neue Strafe">${I.plus}</button>`,
+    body: `<h1 class="title">Strafen</h1><p class="subtitle">Änderungen gelten nur für neue Buchungen.</p>
+      <h2 class="hd">Beitrag</h2><div class="grp"><button class="row inset" data-a="feeSheet"><span class="ticon" style="${cv('teal')}">€</span><div class="grow"><div>Monatsbeitrag</div><div class="mt">${db.settings.feeCents ? (db.settings.feeMode === 'month' ? 'am ersten Abend im Monat' : 'an jedem Abend') + ' · nur Stammspieler' : 'aus'}</div></div><span class="amt">${fmt(db.settings.feeCents)}</span>${I.chev}</button></div>
+      ${body}`
+  };
+}
+
+/* Spieler */
+function vPlayers() {
+  const titles = titleCounts(todayISO(), 12);
+  const row = p => `<button class="row inset" data-a="playerSheet" data-pid="${p.id}">${avatar(p)}<div class="grow nm"><span class="n"${p.isArchived ? ' style="color:var(--text2)"' : ''}>${esc(p.name)}</span></div>${titles[p.id] ? crownBadge(titles[p.id]) : ''}${I.chev}</button>`;
+  const members = activeMembers(), guests = db.players.filter(p => p.isGuest && !p.isArchived).sort(byName), arch = db.players.filter(p => p.isArchived).sort(byName);
+  return {
+    top: `<span></span><button class="gbtn glass" data-a="addPlayerSheet" aria-label="Spieler hinzufügen">${I.plus}</button>`,
+    body: `<h1 class="title">Spieler</h1>
+      <h2 class="hd">Stammspieler <small>${members.length}</small></h2>${members.length ? `<div class="grp">${members.map(row).join('')}</div>` : `<div class="grp"><div class="empty-state">Noch keine Spieler.<br><button class="btn tonal" style="margin-top:12px" data-a="addPlayerSheet">Ersten Spieler anlegen</button></div></div>`}
+      ${guests.length ? `<h2 class="hd">Gäste</h2><div class="grp">${guests.map(row).join('')}</div>` : ''}
+      ${arch.length ? `<h2 class="hd">Archiv</h2><div class="grp">${arch.map(row).join('')}</div>` : ''}
+      <p class="note">Spieler werden archiviert statt gelöscht, damit vergangene Abende vollständig bleiben.</p>`
+  };
+}
+
+/* Könige */
+function vKings() {
+  const months = ui.kingPeriod === '12' ? 12 : 0;
+  const counts = titleCounts(todayISO(), months);
+  let startISO = '';
+  if (months) { const d = new Date(); d.setMonth(d.getMonth() - 12); startISO = isoOf(d); }
+  const inRange = closedEvents().filter(e => e.date > startISO);
+  const ranking = Object.entries(counts).map(([id, n]) => ({p: player(id), n})).filter(x => x.p).sort((a, b) => b.n - a.n || byName(a.p, b.p));
+  const top = ranking[0];
+  const bars = ranking.map(x => `<div class="bar${x.n === top.n ? ' top' : ''}"><span class="bn">${esc(x.p.name)}</span><div class="bt"><div class="bf" style="width:${Math.max(6, x.n / top.n * 100)}%"></div></div><span class="bv">${x.n}</span></div>`).join('');
+  const recent = inRange.slice(0, 10).map(e => { const k = e.kingId && player(e.kingId); return `<div class="row"><span class="mt" style="width:96px;margin:0">${esc(fmtDate(e.date, {day: '2-digit', month: '2-digit', year: 'numeric'}))}</span><span class="grow" style="font-weight:600">${k ? esc(k.name) : '–'}</span>${k ? `<span class="amt">${pumpsOf(e, k.id)} Pumpen</span>` : ''}</div>`; }).join('');
+  return {
+    body: `<h1 class="title">Pumpenkönige</h1>
+      <div class="seg full" role="group" aria-label="Zeitraum" style="margin-top:14px"><button class="${months ? 'on' : ''}" data-a="kingPeriod" data-v="12">12 Monate</button><button class="${months ? '' : 'on'}" data-a="kingPeriod" data-v="all">Gesamt</button></div>
+      ${top ? `<div class="hero"><div class="crownbig">${I.crown(28)}</div><div><div class="sub" style="margin:0">Am häufigsten mit Hut</div><div class="h" style="font-size:21px">${esc(top.p.name)} · ${top.n} ${top.n === 1 ? 'Titel' : 'Titel'}</div><div class="sub">${inRange.length} ${inRange.length === 1 ? 'Abend' : 'Abende'} im Zeitraum</div></div></div>
+      <h2 class="hd">Titel je Spieler</h2><div class="grp" style="padding:8px 0">${bars}</div>` : '<div class="grp" style="margin-top:14px"><div class="empty-state">Noch kein Pumpenkönig. Sobald ein Abend abgeschlossen ist, erscheint hier die Statistik.</div></div>'}
+      ${recent ? `<h2 class="hd">Zuletzt</h2><div class="grp">${recent}</div>` : ''}`
+  };
+}
+
+/* ---------- Sheets ---------- */
+function vSheet() {
+  const sh = ui.sheet;
+  switch (sh.type) {
+    case 'guest': {
+      const known = db.players.filter(p => p.isGuest && !p.isArchived && !ui.setup.guests.includes(p.id)).sort(byName);
+      return sheetHead('Gast hinzufügen') +
+        (known.length ? `<div class="grp" style="margin-bottom:12px">${known.map(g => `<button class="row inset" data-a="addKnownGuest" data-pid="${g.id}">${avatar(g)}<span class="grow">${esc(g.name)}</span>${I.plus}</button>`).join('')}</div>` : '') +
+        `<div class="panel"><label class="field" for="guestName"><span>Neuer Gast</span><input class="input" id="guestName" placeholder="Name" autocomplete="off" data-enter="addNewGuest"></label><button class="btn prim wide" data-a="addNewGuest">Hinzufügen</button></div>`;
+    }
+    case 'more': {
+      const e = evById(sh.eventId);
+      const targets = sh.pids.map(player).filter(Boolean);
+      const others = present(e).length - 1;
+      const tiles = sortedTypes().filter(t => t.isActive && t.category !== 'auto').map(t => {
+        const forOthers = t.recipient === 'others';
+        const dis = forOthers && targets.length !== 1;
+        const sub = forOthers ? (dis ? 'Nur für einen Werfer' : `${others} andere zahlen je ${fmt(t.amountCents)}`) : (t.askAmount ? 'Betrag wählbar' : fmt(t.amountCents));
+        return `<button class="tile${forOthers ? ' ring' : ''}" style="${cv(t.color)}" data-a="moreBook" data-t="${t.id}"${dis ? ' disabled' : ''}><span class="ti">${esc(typeLabel(t))}</span><span class="tn">${esc(t.name)}</span><span class="ta">${sub}</span></button>`;
+      }).join('');
+      return sheetHead('Weitere Strafen', targets.length === 1 ? targets[0].name : `${targets.length} Kegler`) +
+        `<div class="tiles">${tiles}</div>
+        <div class="panel"><h3>Sonstiges</h3>
+          <label class="field" for="otherName"><span>Bezeichnung</span><input class="input" id="otherName" placeholder="z. B. Bier umgekippt" autocomplete="off"></label>
+          <div class="inline"><label class="field" for="otherAmount"><span>Betrag in €</span><input class="input" id="otherAmount" inputmode="decimal" placeholder="2,00" autocomplete="off" data-enter="otherBook"></label>
+          <label class="checkline field" for="otherCat"><input type="checkbox" id="otherCat"> In Katalog</label></div>
+          <button class="btn prim wide" data-a="otherBook">Buchen</button></div>`;
+    }
+    case 'amount': {
+      const t = typeById(sh.typeId);
+      const targets = sh.pids.map(player).filter(Boolean);
+      const base = t.amountCents || 100;
+      const presets = [...new Set([base, base * 2, base * 3, base * 5])];
+      return sheetHead(t.name, targets.length === 1 ? targets[0].name : `${targets.length} Kegler · Betrag je Kegler`) +
+        `<p>Wie hoch ist die Strafe diesmal?</p>
+        <div class="presets">${presets.map(c => `<button class="btn tonal" data-a="amountBook" data-v="${c}">${fmt(c)}</button>`).join('')}</div>
+        <div class="panel"><div class="inline"><label class="field" for="amountInput" style="margin:0"><span>Anderer Betrag in €</span><input class="input" id="amountInput" inputmode="decimal" placeholder="${editMoney(base)}" autocomplete="off" data-enter="amountBook"></label>
+        <button class="btn prim" data-a="amountBook" style="height:48px">Buchen</button></div></div>`;
+    }
+    case 'fee': {
+      const s = db.settings;
+      return sheetHead('Monatsbeitrag') + `<p>Jeder Stammspieler zahlt den Beitrag, auch wenn er fehlt. Gäste zahlen keinen. Er erscheint auf der Ergebniskarte als eigene Spalte.</p>
+        <div class="panel" style="margin-top:0"><label class="field" for="feeAmount"><span>Betrag je Stammspieler in €</span><input class="input" id="feeAmount" inputmode="decimal" value="${editMoney(s.feeCents)}" autocomplete="off" data-enter="saveFee"></label>
+        <label class="field" for="feeMode"><span>Wann berechnen?</span><select class="input" id="feeMode"><option value="month"${s.feeMode === 'month' ? ' selected' : ''}>Am ersten Abend im Monat</option><option value="event"${s.feeMode === 'event' ? ' selected' : ''}>An jedem Abend</option></select></label>
+        <button class="btn prim wide" data-a="saveFee">Sichern</button></div>
+        <p style="margin:12px 4px 0;font-size:13px">0,00 € schaltet den Beitrag aus. Bereits abgeschlossene Abende bleiben unverändert.</p>`;
+    }
+    case 'closeAsk':
+      return sheetHead('Kegeln schließen?') + `<p>Durchschnittsstrafe und Pumpenkönig werden berechnet. Du kannst den Abend später wieder öffnen.</p><div class="stack"><button class="btn prim wide" data-a="closeDo">Abend abschließen</button><button class="btn tonal wide" data-a="sheetClose">Weiter kegeln</button></div>`;
+    case 'tie': {
+      const e = evById(sh.eventId);
+      const cands = sh.pids.map(player).filter(Boolean);
+      return sheetHead('Stechen um den Hut') + `<p>Gleichstand mit ${pumpsOf(e, cands[0].id)} Pumpen. Wer hat das Auskegeln verloren und trägt den Hut?</p><div class="stack">${cands.map(p => `<button class="btn tonal wide" data-a="closeKing" data-pid="${p.id}">${esc(p.name)}</button>`).join('')}</div>`;
+    }
+    case 'confirm':
+      return sheetHead(sh.title) + `<p>${esc(sh.text)}</p><div class="stack"><button class="btn ${sh.danger ? 'danger' : 'prim'} wide" data-a="confirmDo">${esc(sh.label)}</button><button class="btn tonal wide" data-a="sheetClose">Abbrechen</button></div>`;
+    case 'resultMenu':
+      return sheetHead('Abend') + `<div class="stack"><button class="btn tonal wide" data-a="reopenAsk">Wieder öffnen</button><button class="btn danger wide" data-a="deleteAsk">Abend löschen</button></div>`;
+    case 'dataMenu':
+      return sheetHead('Daten') + `<p>Alle Daten liegen nur auf diesem Gerät. Sichere nach jedem Abend ein Backup, z. B. in iCloud Drive.</p>
+        <div class="stack"><button class="btn prim wide" data-a="exportBackup">Backup sichern</button><button class="btn tonal wide" data-a="importBackup">Backup laden</button><button class="btn tonal wide" data-a="exportCsv">Buchungen als CSV</button>
+        ${db.players.length ? '' : '<button class="btn tonal wide" data-a="demo">Beispielclub laden</button>'}<button class="btn danger wide" data-a="resetAsk">Alles zurücksetzen</button></div>`;
+    case 'image':
+      return sheetHead('Ergebnisbild') + `<p>Bild gedrückt halten, um es zu sichern oder zu teilen.</p><img class="shareimg" src="${sh.url}" alt="Ergebniskarte des Kegelabends">`;
+    case 'text':
+      return sheetHead(sh.title) + `<p>${esc(sh.hint)}</p><textarea class="input" id="exportText" readonly>${esc(sh.text)}</textarea><div class="stack" style="margin-top:10px"><button class="btn prim wide" data-a="copyText">Kopieren</button></div>`;
+    case 'typeEdit': return vTypeEditor(sh);
+    case 'player': {
+      const p = player(sh.pid);
+      return sheetHead(p.isGuest ? 'Gast' : 'Spieler') + `<div class="panel" style="margin-top:0"><label class="field" for="pName"><span>Name</span><input class="input" id="pName" value="${esc(p.name)}" autocomplete="off" data-enter="savePlayer"></label><button class="btn prim wide" data-a="savePlayer">Sichern</button></div>
+        <div class="stack" style="margin-top:10px">${p.isGuest && !p.isArchived ? '<button class="btn tonal wide" data-a="promote">Zum Stammspieler machen</button>' : ''}
+        <button class="btn ${p.isArchived ? 'tonal' : 'danger'} wide" data-a="archive">${p.isArchived ? 'Reaktivieren' : 'Archivieren'}</button></div>`;
+    }
+    case 'addPlayer':
+      return sheetHead('Neuer Stammspieler') + `<div class="panel" style="margin-top:0"><label class="field" for="newPlayer"><span>Name</span><input class="input" id="newPlayer" autocomplete="off" data-enter="addPlayer"></label><button class="btn prim wide" data-a="addPlayer">Hinzufügen</button></div>`;
+  }
+  return '';
+}
+
+function vTypeEditor(sh) {
+  const t = sh.id ? typeById(sh.id) : {name: '', amountCents: 50, short: '', color: 'blue', category: 'more', recipient: 'player', countsAsPump: false, systemKind: null, isActive: true};
+  const sys = !!t.systemKind;
+  const opt = (v, l, cur) => `<option value="${v}"${v === cur ? ' selected' : ''}>${l}</option>`;
+  return sheetHead(sh.id ? 'Strafe bearbeiten' : 'Neue Strafe') +
+    `<div class="panel" style="margin-top:0">
+      <label class="field" for="tName"><span>Name</span><input class="input" id="tName" value="${esc(t.name)}" autocomplete="off"></label>
+      ${t.systemKind === 'average' ? '<p style="margin:0 4px 10px;font-size:13px">Der Betrag wird beim Schließen berechnet.</p>' : `<label class="field" for="tAmount"><span>Betrag in €</span><input class="input" id="tAmount" inputmode="decimal" value="${editMoney(t.amountCents)}" autocomplete="off"></label>`}
+      ${sys ? '' : `<div class="inline"><label class="field" for="tCat"><span>Bereich</span><select class="input" id="tCat">${opt('quick', 'Schnellstrafe', t.category)}${opt('more', 'Weitere', t.category)}</select></label>
+        <label class="field" for="tShort"><span>Kürzel</span><input class="input" id="tShort" maxlength="2" value="${esc(t.short)}" autocomplete="off"></label></div>
+        <div class="inline"><label class="field" for="tRec"><span>Wer zahlt?</span><select class="input" id="tRec">${opt('player', 'Der Spieler', t.recipient)}${opt('others', 'Alle anderen', t.recipient)}</select></label>
+        <label class="field" for="tColor"><span>Farbe</span><select class="input" id="tColor">${Object.keys(COLORS).map(c => opt(c, COLOR_LABELS[c], t.color)).join('')}</select></label></div>
+        <label class="checkline" for="tPump"><input type="checkbox" id="tPump"${t.countsAsPump ? ' checked' : ''}> Zählt als Pumpe</label>
+        <label class="checkline" for="tAsk"><input type="checkbox" id="tAsk"${t.askAmount ? ' checked' : ''}> Betrag jedes Mal abfragen</label>`}
+      <label class="checkline" for="tActive"><input type="checkbox" id="tActive"${t.isActive ? ' checked' : ''}> Aktiv</label>
+      <button class="btn prim wide" data-a="saveType" style="margin-top:6px">Sichern</button></div>
+    ${sh.id ? `<div class="btnrow"><button class="btn tonal" data-a="moveType" data-v="-1">Nach oben</button><button class="btn tonal" data-a="moveType" data-v="1">Nach unten</button></div>
+      ${sys ? '' : '<div class="stack" style="margin-top:8px"><button class="btn danger wide" data-a="deleteType">Strafe löschen</button></div>'}` : ''}
+    <p style="margin:12px 4px 0;font-size:13px">Vergangene Abende behalten ihre Beträge.</p>`;
+}
+
+/* ---------- Teilen & Export ---------- */
+function rr(x, X, Y, w, h, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
+function fit(x, text, max) { if (x.measureText(text).width <= max) return text; let t = text; while (t.length > 1 && x.measureText(t + '…').width > max) t = t.slice(0, -1); return t + '…'; }
+function drawCrown(x, cx, cy, s, color) {
+  const k = s / 24; x.save(); x.translate(cx - 12 * k, cy - 12 * k); x.scale(k, k); x.fillStyle = color;
+  x.beginPath(); x.moveTo(3, 7.5); x.lineTo(7.6, 11.7); x.lineTo(12, 4.5); x.lineTo(16.4, 11.7); x.lineTo(21, 7.5); x.lineTo(19.2, 18); x.lineTo(4.8, 18); x.closePath(); x.fill();
+  rr(x, 4.8, 19.2, 14.4, 2, 1); x.fill(); x.restore();
+}
+function drawCard(sm) {
+  const FEE = sm.hasFee;
+  const W = FEE ? 420 : 380, P = 14, CW = W - 2 * P, headH = 226;
+  const money = c => FEE ? fmt(c).replace(/\s?€/, '') : fmt(c);
+  const colP = FEE ? CW - 200 : CW - 104;
+  const F = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif';
+  const FD = '"Bricolage Grotesque", ' + F;
+  const scale = 3, probe = document.createElement('canvas').getContext('2d');
+  probe.font = `11.5px ${F}`;
+  const footText = (FEE ? 'Beträge in €. ' : '') + (sm.exactLabel || '');
+  const footLines = footText.trim() ? wrapLines(probe, footText.trim(), CW - 36) : [];
+  const H = P + headH + 40 + sm.present.length * 32 + sm.absent.length * 42 + (sm.absent.length ? 28 : 0) + footLines.length * 15 + 20 + P;
+  const c = document.createElement('canvas'); c.width = W * scale; c.height = H * scale;
+  const x = c.getContext('2d'); x.scale(scale, scale);
+  // Hintergrund mit Bahnlicht
+  x.fillStyle = '#0A0A12'; x.fillRect(0, 0, W, H);
+  const amb = x.createRadialGradient(0, 0, 0, 0, 0, W); amb.addColorStop(0, 'rgba(255,150,30,0.35)'); amb.addColorStop(1, 'rgba(255,150,30,0)');
+  x.fillStyle = amb; x.fillRect(0, 0, W, H);
+  x.save(); rr(x, P, P, CW, H - 2 * P, 28); x.clip();
+  x.fillStyle = '#14141D'; x.fillRect(P, P, CW, H - 2 * P);
+  const hg = x.createLinearGradient(P, P, P + CW * 0.4, P + headH); hg.addColorStop(0, '#2B1A07'); hg.addColorStop(1, '#14141D');
+  x.fillStyle = hg; x.fillRect(P, P, CW, headH);
+  const g = x.createRadialGradient(P + CW, P, 0, P + CW, P, 230); g.addColorStop(0, 'rgba(255,150,30,0.55)'); g.addColorStop(1, 'rgba(255,150,30,0)');
+  x.fillStyle = g; x.fillRect(P, P, CW, headH);
+  x.textBaseline = 'alphabetic';
+  x.font = `600 11.5px ${F}`; x.fillStyle = 'rgba(255,255,255,0.7)'; x.textAlign = 'left'; x.fillText(sm.dateLabel.toUpperCase(), P + 18, P + 30);
+  x.textAlign = 'right'; x.fillText(sm.countLabel.toUpperCase(), P + CW - 18, P + 30); x.textAlign = 'left';
+  // Krone
+  const glow = x.createRadialGradient(P + 51, P + 94, 20, P + 51, P + 94, 60); glow.addColorStop(0, 'rgba(255,150,30,0.6)'); glow.addColorStop(1, 'rgba(255,150,30,0)');
+  x.fillStyle = glow; x.fillRect(P, P + 34, 120, 120);
+  const cg = x.createLinearGradient(P + 18, P + 61, P + 84, P + 127); cg.addColorStop(0, '#FFE08A'); cg.addColorStop(0.5, '#FFB020'); cg.addColorStop(1, '#FF7A1A');
+  x.fillStyle = cg; x.beginPath(); x.arc(P + 51, P + 94, 33, 0, Math.PI * 2); x.fill();
+  drawCrown(x, P + 51, P + 94, 36, '#1A1004');
+  x.font = `700 11.5px ${F}`; x.fillStyle = '#FFC861'; x.fillText('PUMPENKÖNIG · HUT AUF', P + 100, P + 76);
+  x.font = `800 32px ${FD}`; x.fillStyle = '#FFFFFF'; x.fillText(fit(x, sm.kingName || 'Kein König', CW - 118), P + 100, P + 108);
+  if (sm.kingName) { x.font = `13px ${F}`; x.fillStyle = 'rgba(255,255,255,0.72)'; x.fillText(`${sm.kingPumps} Pumpen · ${sm.kingTitles}. Titel in 12 Monaten`, P + 100, P + 128); }
+  const chips = FEE ? [['STRAFEN', fmt(sm.total)], ['BEITRÄGE', fmt(sm.feeTotal)], ['KASSE GESAMT', fmt(sm.grand)]] : [['GESAMT', fmt(sm.total)], ['Ø-STRAFE', fmt(sm.avg)], ['PUMPEN', String(sm.pumps)]];
+  const cw = (CW - 36 - 16) / 3;
+  chips.forEach(([l, v], i) => {
+    const cx = P + 18 + i * (cw + 8), cy = P + 150;
+    x.fillStyle = 'rgba(255,255,255,0.08)'; rr(x, cx, cy, cw, 58, 16); x.fill();
+    x.strokeStyle = 'rgba(255,255,255,0.12)'; x.lineWidth = 1; rr(x, cx + 0.5, cy + 0.5, cw - 1, 57, 16); x.stroke();
+    x.textAlign = 'center'; x.font = `600 10.5px ${F}`; x.fillStyle = 'rgba(255,255,255,0.65)'; x.fillText(l, cx + cw / 2, cy + 22);
+    x.font = `800 18px ${FD}`; x.fillStyle = '#FFFFFF'; x.fillText(fit(x, v, cw - 8), cx + cw / 2, cy + 45); x.textAlign = 'left';
+  });
+  let y = P + headH + 26;
+  x.font = `700 10.5px ${F}`; x.fillStyle = '#8C8CA0'; x.fillText('KEGLER', P + 42, y);
+  x.textAlign = 'right';
+  if (FEE) { x.fillText('P', P + colP, y); x.fillText('STRAFE', P + CW - 144, y); x.fillText('BEITRAG', P + CW - 82, y); x.fillText('GESAMT', P + CW - 18, y); }
+  else { x.fillText('PUMPEN', P + colP, y); x.fillText('BETRAG', P + CW - 18, y); }
+  x.textAlign = 'left';
+  y += 10;
+  const amounts = (r, base, king) => {
+    x.textAlign = 'right'; x.font = `${king ? '800' : '400'} 15px ${F}`; x.fillStyle = king ? '#FFC861' : '#A6A6B8';
+    x.fillText(r.rank ? String(r.pumps) : r.mark, P + colP, base);
+    if (FEE) {
+      x.font = `400 15px ${F}`; x.fillStyle = '#CFCFDA';
+      x.fillText(money(r.cents), P + CW - 144, base); x.fillText(money(r.fee), P + CW - 82, base);
+      x.font = `700 15px ${F}`; x.fillStyle = '#FFFFFF'; x.fillText(money(r.sum), P + CW - 18, base);
+    } else { x.font = `700 15px ${F}`; x.fillStyle = '#FFFFFF'; x.fillText(fmt(r.cents), P + CW - 18, base); }
+    x.textAlign = 'left';
+  };
+  const drawRow = (r, i) => {
+    const king = r.rank && r.id === sm.kingId;
+    if (king) {
+      const kg = x.createLinearGradient(P, 0, P + CW, 0); kg.addColorStop(0, 'rgba(255,176,32,0.28)'); kg.addColorStop(1, 'rgba(255,176,32,0.04)');
+      x.fillStyle = kg; x.fillRect(P, y, CW, 32);
+    } else if (i % 2) { x.fillStyle = 'rgba(255,255,255,0.025)'; x.fillRect(P, y, CW, 32); }
+    x.font = `700 13px ${F}`; x.fillStyle = king ? '#FFC861' : '#8C8CA0'; x.fillText(String(r.rank), P + 18, y + 21);
+    x.font = `${king ? '800' : '400'} 15px ${F}`; x.fillStyle = '#F6F5FA';
+    const nm = fit(x, r.name, (colP - 70) - (r.tag ? 50 : 0)); x.fillText(nm, P + 42, y + 21);
+    if (r.tag) {
+      const nx = P + 42 + x.measureText(nm).width + 6; x.font = `700 10.5px ${F}`;
+      const tw = x.measureText(r.tag).width + 12;
+      x.fillStyle = 'rgba(61,139,255,0.22)'; rr(x, nx, y + 9, tw, 17, 8.5); x.fill(); x.fillStyle = '#86BDFF'; x.fillText(r.tag, nx + 6, y + 21.5);
+    }
+    amounts(r, y + 21, king);
+    y += 32;
+  };
+  const drawAbsent = r => {
+    x.font = `500 15px ${F}`; x.fillStyle = '#F6F5FA'; x.fillText(fit(x, r.name, colP - 70), P + 42, y + 18);
+    x.font = `${r.streak >= 3 ? '700' : '400'} 11.5px ${F}`; x.fillStyle = r.streak >= 3 ? '#FF8A80' : '#A6A6B8';
+    x.fillText(fit(x, r.subline, colP - 50), P + 42, y + 34);
+    amounts(r, y + 25, false);
+    y += 42;
+  };
+  sm.present.forEach(drawRow);
+  if (sm.absent.length) { x.font = `700 10.5px ${F}`; x.fillStyle = '#8C8CA0'; x.fillText('ABWESEND', P + 18, y + 19); y += 28; sm.absent.forEach(drawAbsent); }
+  if (footLines.length) { y += 14; x.font = `11.5px ${F}`; x.fillStyle = '#8C8CA0'; footLines.forEach(l => { x.fillText(l, P + 18, y); y += 15; }); }
+  x.restore();
+  x.strokeStyle = 'rgba(255,176,32,0.25)'; x.lineWidth = 1; rr(x, P + 0.5, P + 0.5, CW - 1, H - 2 * P - 1, 28); x.stroke();
+  return c;
+}
+function wrapLines(x, text, max) {
+  const words = text.split(' '); const lines = []; let cur = '';
+  words.forEach(w => { const t = cur ? cur + ' ' + w : w; if (x.measureText(t).width > max && cur) { lines.push(cur); cur = w; } else cur = t; });
+  if (cur) lines.push(cur); return lines;
+}
+async function shareFile(blob, name, fallback) {
+  try {
+    const file = new File([blob], name, {type: blob.type});
+    if (navigator.canShare && navigator.canShare({files: [file]})) { await navigator.share({files: [file]}); return; }
+  } catch (err) { if (err && err.name === 'AbortError') return; }
+  fallback();
+}
+async function shareResult(e) {
+  const c = drawCard(summary(e));
+  const url = c.toDataURL('image/png');
+  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  if (!blob) { ui.sheet = {type: 'image', url}; render(); return; }
+  await shareFile(blob, `Kegelabend-${e.date}.png`, () => { ui.sheet = {type: 'image', url}; render(); });
+}
+function exportText(text, name, mime, title, hint) {
+  shareFile(new Blob([text], {type: mime}), name, () => { ui.sheet = {type: 'text', title, hint, text}; render(); });
+}
+function csv() {
+  const lines = ['Datum;Uhrzeit;Spieler;Gast;Strafe;Betrag;Pumpe;Quelle;Storniert'];
+  [...db.events].sort((a, b) => a.date.localeCompare(b.date)).forEach(e => e.entries.slice().sort((a, b) => a.ts - b.ts).forEach(x => {
+    const p = player(x.playerId);
+    lines.push([fmtDate(e.date, {day: '2-digit', month: '2-digit', year: 'numeric'}), new Date(x.ts).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}),
+      p ? p.name : '', p && p.isGuest ? 'ja' : 'nein', x.name, editMoney(x.amountCents), x.isPump ? 'ja' : 'nein', x.source, x.isVoided ? 'ja' : 'nein']
+      .map(v => String(v).replace(/;/g, ',')).join(';'));
+  }));
+  return lines.join('\n');
+}
+
+/* ---------- Beispielclub ---------- */
+function loadDemo() {
+  const names = ['Andreas', 'Frank', 'Jörg', 'Markus', 'Michael', 'Philipp', 'Stefan', 'Thomas'];
+  const ps = names.map(n => ({id: uid(), name: n, isGuest: false, isArchived: false, createdAt: Date.now()}));
+  const klaus = {id: uid(), name: 'Klaus', isGuest: true, isArchived: false, createdAt: Date.now()};
+  db.players.push(...ps, klaus);
+  db.settings.feeCents = 1000; db.settings.feeMode = 'month';
+  const [pumpe, spiel, klingel] = quickTypes();
+  let seed = 11; const rnd = n => { seed = (seed * 9301 + 49297) % 233280; return Math.floor(seed / 233280 * n); };
+  [28, 14, 7].forEach((daysAgo, i) => {
+    const d = new Date(); d.setDate(d.getDate() - daysAgo);
+    const e = {id: uid(), date: isoOf(d), status: 'live', startedAt: d.getTime(), closedAt: null, averageCents: null, kingId: null, attendances: [], entries: []};
+    ps.forEach(p => {
+      let st = 'present';
+      if (p.name === 'Jörg' && i >= 1) st = i === 1 ? 'excused' : 'unexcused';
+      if (p.name === 'Michael' && i === 2) st = 'excused';
+      e.attendances.push({playerId: p.id, status: st});
+    });
+    if (i === 2) e.attendances.push({playerId: klaus.id, status: 'present'});
+    present(e).forEach(p => {
+      [[pumpe, 6], [spiel, 4], [klingel, 5]].forEach(([t, max]) => { if (!t) return; const n = rnd(max); for (let k = 0; k < n; k++) e.entries.push(mkEntry(p.id, t.name, t.amountCents, t.countsAsPump, 'manual', uid(), t.id)); });
+    });
+    db.events.push(e);
+    const c = kingCandidates(e);
+    closeEvent(e, c.length ? c[0].id : null);
+  });
+  save();
+}
+
+/* ---------- Aktionen ---------- */
+const val = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+const checked = id => { const el = document.getElementById(id); return !!(el && el.checked); };
+const curEvent = () => { const s = screen(); return evById(s.eventId); };
+const exitSelect = () => { ui.selecting = false; ui.selection = new Set(); };
+
+const A = {
+  tab: d => { ui.tab = d.v; ui.stack = []; ui.sheet = null; exitSelect(); render(); },
+  back: () => { ui.stack.pop(); exitSelect(); ui.sheet = null; render(); },
+  sheetClose: () => { ui.sheet = null; render(); },
+  open: d => { const e = evById(d.id); if (e) push({name: e.status === 'live' ? 'live' : 'result', eventId: e.id}); },
+  newEvent: () => {
+    const live = db.events.find(e => e.status === 'live');
+    if (live) { push({name: 'live', eventId: live.id}); return; }
+    ui.setup = {date: todayISO(), statuses: {}, guests: []}; push({name: 'setup'});
+  },
+  setStatus: d => { ui.setup.statuses[d.pid] = d.v; render(); },
+  guestSheet: () => { ui.sheet = {type: 'guest'}; ui.focus = 'guestName'; render(); },
+  addKnownGuest: d => { ui.setup.guests.push(d.pid); ui.sheet = null; render(); },
+  addNewGuest: () => {
+    const name = val('guestName').trim(); if (!name) return;
+    const g = {id: uid(), name, isGuest: true, isArchived: false, createdAt: Date.now()};
+    db.players.push(g); save(); ui.setup.guests.push(g.id); ui.sheet = null; render();
+  },
+  removeGuest: d => { ui.setup.guests = ui.setup.guests.filter(id => id !== d.pid); render(); },
+  startEvent: () => {
+    const st = ui.setup;
+    const e = {id: uid(), date: st.date, status: 'live', startedAt: Date.now(), closedAt: null, averageCents: null, kingId: null, attendances: [], entries: []};
+    activeMembers().forEach(p => e.attendances.push({playerId: p.id, status: st.statuses[p.id] || 'present'}));
+    st.guests.forEach(id => e.attendances.push({playerId: id, status: 'present'}));
+    db.events.push(e); save();
+    replaceTop({name: 'live', eventId: e.id}); render();
+  },
+  detail: d => push({name: 'detail', eventId: screen().eventId, pid: d.pid}),
+  quick: d => {
+    const e = curEvent(), t = typeById(d.t), p = player(d.pid);
+    if (!e || !t || !p) return;
+    if (t.askAmount) { askAmount(e, t, [p.id]); return; }
+    book(e, t, [p]); render();
+  },
+  amountBook: d => {
+    const sh = ui.sheet, e = evById(sh.eventId), t = typeById(sh.typeId);
+    const cents = d.v != null ? Number(d.v) : parseMoney(val('amountInput'));
+    if (!cents) { const el = document.getElementById('amountInput'); if (el) el.focus(); return; }
+    book(e, t, sh.pids.map(player).filter(Boolean), cents); ui.sheet = null; exitSelect(); render();
+  },
+  feeSheet: () => { ui.sheet = {type: 'fee'}; render(); },
+  saveFee: () => {
+    const c = parseMoney(val('feeAmount'));
+    if (c == null) { document.getElementById('feeAmount').focus(); return; }
+    db.settings.feeCents = c; db.settings.feeMode = val('feeMode'); save(); ui.sheet = null; render();
+  },
+  more: d => { ui.sheet = {type: 'more', eventId: screen().eventId, pids: [d.pid]}; render(); },
+  sortRank: d => { ui.sortRank = d.v === '1'; render(); },
+  selStart: () => { ui.selecting = true; ui.toast = null; render(); },
+  selCancel: () => { exitSelect(); render(); },
+  selAll: () => { const e = curEvent(); ui.selection = new Set(present(e).map(p => p.id)); render(); },
+  selToggle: d => { ui.selection.has(d.pid) ? ui.selection.delete(d.pid) : ui.selection.add(d.pid); render(); },
+  selBook: d => {
+    const e = curEvent(), t = typeById(d.t); const ps = present(e).filter(p => ui.selection.has(p.id));
+    if (!ps.length || !t) return;
+    if (t.askAmount) { askAmount(e, t, ps.map(p => p.id)); return; }
+    book(e, t, ps); exitSelect(); render();
+  },
+  selMore: () => { const e = curEvent(); const pids = present(e).filter(p => ui.selection.has(p.id)).map(p => p.id); if (pids.length) { ui.sheet = {type: 'more', eventId: e.id, pids}; render(); } },
+  moreBook: d => {
+    const sh = ui.sheet, e = evById(sh.eventId), t = typeById(d.t);
+    if (t.askAmount) { askAmount(e, t, sh.pids); return; }
+    book(e, t, sh.pids.map(player).filter(Boolean)); ui.sheet = null; exitSelect(); render();
+  },
+  otherBook: () => {
+    const sh = ui.sheet, e = evById(sh.eventId);
+    const name = val('otherName').trim(), cents = parseMoney(val('otherAmount'));
+    if (!name) { ui.focus = 'otherName'; document.getElementById('otherName').focus(); return; }
+    if (!cents) { document.getElementById('otherAmount').focus(); return; }
+    if (checked('otherCat')) db.types.push(T(name, cents, '', 'gray', 'more', 'player', false, null, Math.max(0, ...db.types.map(t => t.sortOrder)) + 1));
+    bookOther(e, name, cents, sh.pids.map(player).filter(Boolean)); ui.sheet = null; exitSelect(); render();
+  },
+  undo: () => {
+    const t = ui.toast; if (!t) return;
+    const e = evById(t.eventId); if (e) { e.entries = e.entries.filter(x => x.groupId !== t.groupId); save(); }
+    ui.toast = null; clearTimeout(toastTimer); render();
+  },
+  closeAsk: () => { ui.sheet = {type: 'closeAsk'}; render(); },
+  closeDo: () => {
+    const e = curEvent(); const c = kingCandidates(e);
+    if (c.length > 1) { ui.sheet = {type: 'tie', eventId: e.id, pids: c.map(p => p.id)}; render(); return; }
+    finishClose(e, c[0] ? c[0].id : null);
+  },
+  closeKing: d => finishClose(curEvent(), d.pid),
+  void: d => { const e = curEvent(); const x = e.entries.find(y => y.id === d.id); if (x) { x.isVoided = !x.isVoided; save(); render(); } },
+  share: () => { const e = curEvent(); if (e) shareResult(e); },
+  resultMenu: () => { ui.sheet = {type: 'resultMenu'}; render(); },
+  reopenAsk: () => { ui.sheet = {type: 'confirm', title: 'Abend wieder öffnen?', text: 'Durchschnittsstrafe und Pumpenkönig werden beim erneuten Schließen neu berechnet.', label: 'Wieder öffnen', act: 'reopen'}; render(); },
+  deleteAsk: () => { ui.sheet = {type: 'confirm', title: 'Abend löschen?', text: 'Alle Buchungen dieses Abends werden endgültig entfernt.', label: 'Endgültig löschen', danger: true, act: 'deleteEvent'}; render(); },
+  resetAsk: () => { ui.sheet = {type: 'confirm', title: 'Alles zurücksetzen?', text: 'Spieler, Katalog und alle Abende werden auf diesem Gerät gelöscht. Sichere vorher ein Backup.', label: 'Alles löschen', danger: true, act: 'reset'}; render(); },
+  confirmDo: () => {
+    const act = ui.sheet.act; ui.sheet = null;
+    if (act === 'reopen') { const e = curEvent(); reopenEvent(e); replaceTop({name: 'live', eventId: e.id}); }
+    if (act === 'deleteEvent') { const e = curEvent(); db.events = db.events.filter(x => x !== e); save(); ui.stack.pop(); }
+    if (act === 'reset') { db = emptyDb(); save(); ui.stack = []; ui.tab = 'events'; }
+    render();
+  },
+  dataMenu: () => { ui.sheet = {type: 'dataMenu'}; render(); },
+  exportBackup: () => exportText(JSON.stringify(db, null, 1), `Kegelkasse-Backup-${todayISO()}.json`, 'application/json', 'Backup', 'Text kopieren und sicher ablegen, z. B. in einer Notiz.'),
+  exportCsv: () => exportText(csv(), `Kegelkasse-${todayISO()}.csv`, 'text/csv', 'CSV-Export', 'Text kopieren und in Numbers oder Excel einfügen.'),
+  importBackup: () => document.getElementById('importFile').click(),
+  copyText: async () => {
+    const ta = document.getElementById('exportText');
+    try { await navigator.clipboard.writeText(ta.value); ui.sheet = null; render(); } catch (e) { ta.focus(); ta.select(); }
+  },
+  demo: () => { loadDemo(); ui.sheet = null; ui.tab = 'events'; ui.stack = []; render(); },
+  newType: () => { ui.sheet = {type: 'typeEdit', id: null}; ui.focus = 'tName'; render(); },
+  editType: d => { ui.sheet = {type: 'typeEdit', id: d.id}; render(); },
+  saveType: () => {
+    const sh = ui.sheet;
+    const name = val('tName').trim(); if (!name) { document.getElementById('tName').focus(); return; }
+    let t = sh.id ? typeById(sh.id) : null;
+    if (!t) { t = T(name, 0, '', 'blue', 'more', 'player', false, null, Math.max(0, ...db.types.map(x => x.sortOrder)) + 1); db.types.push(t); }
+    t.name = name;
+    if (t.systemKind !== 'average') { const c = parseMoney(val('tAmount')); if (c == null) { document.getElementById('tAmount').focus(); return; } t.amountCents = c; }
+    t.isActive = checked('tActive');
+    if (!t.systemKind) {
+      t.category = val('tCat'); t.recipient = val('tRec'); t.color = val('tColor');
+      t.short = val('tShort').trim().toUpperCase(); t.countsAsPump = checked('tPump'); t.askAmount = checked('tAsk');
+    }
+    save(); ui.sheet = null; render();
+  },
+  moveType: d => {
+    const t = typeById(ui.sheet.id); const list = sortedTypes().filter(x => x.category === t.category);
+    const i = list.indexOf(t), j = i + Number(d.v);
+    if (j < 0 || j >= list.length) return;
+    const o = list[j].sortOrder; list[j].sortOrder = t.sortOrder; t.sortOrder = o;
+    if (list[j].sortOrder === t.sortOrder) t.sortOrder += Number(d.v);
+    save(); render();
+  },
+  deleteType: () => { db.types = db.types.filter(t => t.id !== ui.sheet.id); save(); ui.sheet = null; render(); },
+  addPlayerSheet: () => { ui.sheet = {type: 'addPlayer'}; ui.focus = 'newPlayer'; render(); },
+  addPlayer: () => {
+    const name = val('newPlayer').trim(); if (!name) return;
+    db.players.push({id: uid(), name, isGuest: false, isArchived: false, createdAt: Date.now()}); save();
+    ui.sheet = {type: 'addPlayer'}; ui.focus = 'newPlayer'; render();
+  },
+  playerSheet: d => { ui.sheet = {type: 'player', pid: d.pid}; render(); },
+  savePlayer: () => { const p = player(ui.sheet.pid), n = val('pName').trim(); if (p && n) { p.name = n; save(); } ui.sheet = null; render(); },
+  promote: () => { const p = player(ui.sheet.pid); p.isGuest = false; save(); ui.sheet = null; render(); },
+  archive: () => { const p = player(ui.sheet.pid); p.isArchived = !p.isArchived; save(); ui.sheet = null; render(); },
+  kingPeriod: d => { ui.kingPeriod = d.v; render(); }
+};
+function askAmount(e, t, pids) {
+  ui.sheet = {type: 'amount', eventId: e.id, typeId: t.id, pids};
+  render();
+}
+function finishClose(e, kingId) {
+  closeEvent(e, kingId);
+  ui.sheet = null; ui.toast = null; exitSelect();
+  replaceTop({name: 'result', eventId: e.id});
+  render();
+}
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener('click', ev => {
+  if (ev.target.classList && ev.target.classList.contains('sheet-bg')) { ui.sheet = null; render(); return; }
+  const el = ev.target.closest('[data-a]');
+  if (!el || el.disabled) return;
+  const fn = A[el.dataset.a];
+  if (fn) { ev.preventDefault(); fn(el.dataset, el); }
+});
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.id === 'setupDate' && ui.setup) { ui.setup.date = t.value || todayISO(); render(); }
+  if (t.id === 'importFile' && t.files && t.files[0]) {
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const d = JSON.parse(r.result);
+        if (!isDb(d)) throw new Error('format');
+        db = migrate(d); save(); ui.stack = []; ui.tab = 'events'; ui.sheet = null; render();
+      } catch (e) { ui.sheet = {type: 'confirm', title: 'Backup nicht lesbar', text: 'Die Datei ist kein Kegelkasse-Backup. Wähle die JSON-Datei, die du mit „Backup sichern“ erstellt hast.', label: 'OK', act: 'none'}; render(); }
+    };
+    r.readAsText(t.files[0]); t.value = '';
+  }
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && ui.sheet) { ui.sheet = null; render(); return; }
+  if (ev.key === 'Enter' && ev.target.dataset && ev.target.dataset.enter) { ev.preventDefault(); const fn = A[ev.target.dataset.enter]; if (fn) fn({}); }
+});
+
+/* Offline-Fähigkeit, wenn als eigene Web-App gehostet */
+if ('serviceWorker' in navigator && location.protocol === 'https:' && window.KEGELKASSE_PWA) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+render();
+})();
+</script>
+
+</body>
+</html>
